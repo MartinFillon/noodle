@@ -30,7 +30,10 @@ resolver:
 #   - auto-update
 #   - wai
 packages:
-- .
+  - .
+
+extra-deps:
+  - syb-0.7.2.4
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:

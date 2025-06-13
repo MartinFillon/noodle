@@ -1,13 +1,13 @@
 {-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverlappingInstances #-}
 
 module Lib where
 
 import Data.Data
-import Data.Generics.Aliases
+import Object (Object (..))
+import Serialize (Serialize (..))
+import Utils (maybeToEither)
 
 data Json = O [(String, Json)] | S String | N Double | B Bool | Null | A [Json]
     deriving (Data)
@@ -24,25 +24,6 @@ instance Show Json where
       where
         disp (a, b) = show a ++ ':' : show b
     show (O []) = "{}"
-
-class Typeable f => Object f where
-    get :: String -> f -> Either String f
-
-    asBool :: f -> Either String Bool
-
-    asDouble :: f -> Either String Double
-
-    asString :: f -> Either String String
-
-    asArray :: f -> Either String [f]
-
-    asObject :: f -> Either String f
-
-    wrapInObject :: [(String, f)] -> f
-
-maybeToEither :: a -> Maybe b -> Either a b
-maybeToEither x Nothing = Left x
-maybeToEither _ (Just x) = Right x
 
 instance Object Json where
     get :: String -> Json -> Either String Json
@@ -72,12 +53,14 @@ instance Object Json where
     wrapInObject :: [(String, Json)] -> Json
     wrapInObject = O
 
+    makeNumber :: Double -> Json
+    makeNumber = N
+
+    makeBool :: Bool -> Json
+    makeBool = B
+
 class Deserializable t where
     from :: Object f => f -> Either String t
-
-class (Object f, Data t) => Serializable t f where
-    to :: t -> f
-    to = error "unimplemented"
 
 data Test = Test
     { foo :: Double,
@@ -92,29 +75,8 @@ instance Deserializable Test where
         construct :: Object f => f -> f -> Either String Test
         construct d b = Test <$> asDouble d <*> asBool b
 
-instance Serializable Bool Json where
-    to :: Bool -> Json
-    to = B
+instance Serialize Test Json
 
-instance {-# OVERLAPPABLE #-} Object f => Serializable Double f where
-    to :: Double -> f
-    to = error ""
-
-instance {-# OVERLAPPABLE #-} Serializable Double Json where
-    to :: Double -> Json
-    to = N
-
-double' :: Object f => Double -> f
-double' = to
-
-boolean' :: Object f => Bool -> f
-boolean' = to
-
-toObject :: (Object f, Data a) => a -> f
-toObject =
-    mkQ (error "unknown") id
-        `extQ` double'
-        `extQ` boolean'
-
-getFieldsNameValue :: (Object f, Data a) => a -> [(String, f)]
-getFieldsNameValue d = zip (constrFields $ toConstr d) (gmapQ toObject d)
+main :: IO ()
+main = do
+    print (to (Test 1 False) :: Json)

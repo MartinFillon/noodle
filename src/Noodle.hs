@@ -1,11 +1,11 @@
 module Noodle (
-  module Json,
-  module Yaml,
-  module Serialize,
-  module Serializer
+  module Noodle.Json,
+  module Noodle.Yaml,
+  module Noodle.Serialize,
+  module Noodle.Serializer
 ) where
 
-import Json
-import Yaml
-import Serialize
-import Serializer
+import Noodle.Json
+import Noodle.Yaml
+import Noodle.Serialize
+import Noodle.Serializer

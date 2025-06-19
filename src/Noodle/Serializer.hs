@@ -1,4 +1,4 @@
-module Serializer (Serializer (..)) where
+module Noodle.Serializer (Serializer (..)) where
 
 class Serializer s where
     object :: [(String, s)] -> s

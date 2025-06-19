@@ -1,10 +1,10 @@
-module Json (Json (..), prettyPrintJson) where
+module Noodle.Json (Json (..), prettyPrintJson) where
 
 import Data.List (intercalate)
-import Serializer (Serializer (..))
+import Noodle.Serializer (Serializer (..))
 
 data Json = JObject [(String, Json)] | JString String | JNumber Double | JBool Bool | Null | JArray [Json]
-    deriving (Show)
+    deriving (Show, Eq)
 
 instance Serializer Json where
     object :: [(String, Json)] -> Json

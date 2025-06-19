@@ -7,10 +7,10 @@ Example Usage :
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 import GHC.Generics (Generic)
-import Json (prettyPrintJson, Json)
-import Yaml (prettyPrintYaml, Yaml)
-import Serialize (Serialize (serialize))
-import Serializer (Serializer)
+import Noodle.Json (prettyPrintJson, Json)
+import Noodle.Yaml (prettyPrintYaml, Yaml)
+import Noodle.Serialize (Serialize (serialize))
+import Noodle.Serializer (Serializer)
 
 data Test = Test
     { foo :: Double,

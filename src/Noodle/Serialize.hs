@@ -1,4 +1,4 @@
-module Serialize(Serialize(..)) where
+module Noodle.Serialize(Serialize(..)) where
 
 import GHC.Generics (
     M1(..),
@@ -11,7 +11,7 @@ import GHC.Generics (
     Selector(..),
     S
  )
-import Serializer (Serializer (..))
+import Noodle.Serializer (Serializer (..))
 
 class Serializer f => Serialize a f where
     serialize :: a -> f
@@ -26,7 +26,7 @@ instance Serializer f => GSerialize V1 f where
     gSerialize x = case x of {}
 
 instance Serializer f => GSerialize U1 f where
-    gSerialize _ = Serializer.null
+    gSerialize _ = Noodle.Serializer.null
 
 instance (Serializer a, GSerialize f a) => GSerialize (M1 i t f) a where
     gSerialize (M1 x) = gSerialize x
@@ -55,8 +55,8 @@ instance Serializer f => Serialize Bool f where
 instance Serializer f => Serialize String f where
     serialize = string
 
-instance Serializer f => Serialize Int f where
-    serialize = number . fromIntegral
-
 instance (Serializer f, Serialize a f) => Serialize [a] f where
     serialize = array . map serialize
+
+instance (Integral a, Serializer f) => Serialize a f where
+    serialize = number . fromIntegral

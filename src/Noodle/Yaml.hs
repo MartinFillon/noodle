@@ -1,7 +1,7 @@
-module Yaml (Yaml (..), prettyPrintYaml) where
+module Noodle.Yaml (Yaml (..), prettyPrintYaml) where
 
 import Data.List (intercalate)
-import Serializer (Serializer (..))
+import Noodle.Serializer (Serializer (..))
 
 data Yaml = YObject [(String, Yaml)]
           | YString String
@@ -9,7 +9,7 @@ data Yaml = YObject [(String, Yaml)]
           | YBool Bool
           | YNull
           | YArray [Yaml]
-    deriving (Show)
+    deriving (Show, Eq)
 
 instance Serializer Yaml where
     object :: [(String, Yaml)] -> Yaml

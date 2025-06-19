@@ -4,12 +4,12 @@ name:                noodle
 version:             0.1.0.0
 -- synopsis:
 -- description:
-homepage:            https://github.com/githubuser/noodle#readme
+homepage:            https://github.com/MartinFillon/noodle#readme
 license:             BSD-3-Clause
 license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2025 Author name here
+author:              Martin Fillon
+maintainer:          martin.fillon@hotmail.com
+copyright:           2025 Martin Fillon
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md
@@ -74,4 +74,4 @@ test-suite noodle-test
 
 source-repository head
   type:     git
-  location: https://github.com/githubuser/noodle
+  location: https://github.com/MartinFillon/noodle

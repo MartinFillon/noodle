@@ -1,52 +1,62 @@
 module Serialize(Serialize(..)) where
 
-import GHC.Generics
-import Json(Json (..), merge)
+import GHC.Generics (
+    M1(..),
+    V1,
+    Generic (..),
+    U1(..),
+    (:+:)(..),
+    (:*:)(..),
+    K1(..),
+    Selector(..),
+    S
+ )
+import Serializer (Serializer (..))
 
-class Serialize a where
-    toJson :: a -> Json
+class Serializer f => Serialize a f where
+    serialize :: a -> f
 
-    default toJson :: (Generic a, GSerialize (Rep a)) => a -> Json
-    toJson x = serialize (from x)
+    default serialize :: (Generic a, GSerialize (Rep a) f) => a -> f
+    serialize x = gSerialize (from x)
 
-class GSerialize a where
-    serialize :: a b -> Json
+class Serializer f => GSerialize a f where
+    gSerialize :: a b -> f
 
-instance GSerialize V1 where
-    serialize x = case x of {}
+instance Serializer f => GSerialize V1 f where
+    gSerialize x = case x of {}
 
-instance GSerialize U1 where
-    serialize _ = Null
+instance Serializer f => GSerialize U1 f where
+    gSerialize _ = Serializer.null
 
-instance (GSerialize f) => GSerialize (M1 i t f) where
-    serialize (M1 x) = serialize x
+instance (Serializer a, GSerialize f a) => GSerialize (M1 i t f) a where
+    gSerialize (M1 x) = gSerialize x
 
-instance (GSerialize f, GSerialize g) => GSerialize (f :*: g) where
-    serialize (f :*: g) = merge (serialize f) (serialize g)
+instance (Serializer a, GSerialize f a, GSerialize g a) => GSerialize (f :*: g) a where
+    gSerialize (f :*: g) = merge (gSerialize f) (gSerialize g)
 
-instance (GSerialize f, GSerialize g) => GSerialize (f :+: g) where
-    serialize (L1 x) = serialize x
-    serialize (R1 x) = serialize x
+instance (Serializer a, GSerialize f a, GSerialize g a) => GSerialize (f :+: g) a where
+    gSerialize (L1 x) = gSerialize x
+    gSerialize (R1 x) = gSerialize x
 
-instance (Selector s, GSerialize f) => GSerialize (M1 S s f) where
-    serialize a@(M1 x)  | name /= [] = JObject [(name, serialize x)]
-                        | otherwise = serialize x
+instance (Serializer a, Selector s, GSerialize f a) => GSerialize (M1 S s f) a where
+    gSerialize a@(M1 x) | name /= [] = object [(name, gSerialize x)]
+                        | otherwise = gSerialize x
                         where name = selName a
 
-instance (Serialize c) => GSerialize (K1 i c) where
-    serialize (K1 x) = toJson x
+instance (Serializer f, Serialize c f) => GSerialize (K1 i c) f where
+    gSerialize (K1 x) = serialize x
 
-instance Serialize Double where
-    toJson = JNumber
+instance Serializer f => Serialize Double f where
+    serialize = number
 
-instance Serialize Bool where
-    toJson = JBool
+instance Serializer f => Serialize Bool f where
+    serialize = bool
 
-instance Serialize String where
-    toJson = JString
+instance Serializer f => Serialize String f where
+    serialize = string
 
-instance Serialize Int where
-    toJson = JNumber . fromIntegral
+instance Serializer f => Serialize Int f where
+    serialize = number . fromIntegral
 
-instance Serialize a => Serialize [a] where
-    toJson = JArray . map toJson
+instance (Serializer f, Serialize a f) => Serialize [a] f where
+    serialize = array . map serialize

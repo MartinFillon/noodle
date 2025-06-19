@@ -38,6 +38,7 @@ library
                        -XFlexibleContexts
                        -XInstanceSigs
                        -XFlexibleInstances
+                       -XMultiParamTypeClasses
 
 source-repository head
   type:     git

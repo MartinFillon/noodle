@@ -47,6 +47,9 @@ instance (Serializer a, Selector s, GSerialize f a) => GSerialize (M1 S s f) a w
 instance (Serializer f, Serialize c f) => GSerialize (K1 i c) f where
     gSerialize (K1 x) = serialize x
 
+instance Serializer f => Serialize Double f where
+    serialize = number
+
 instance Serializer f => Serialize Bool f where
     serialize = bool
 

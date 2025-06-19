@@ -42,10 +42,10 @@ prettyPrintTomlWithPath path (TObject kvs) =
     let (scalars, objects) = partitionScalarsAndObjects kvs
         scalarLines = [key ++ " = " ++ prettyValue v | (key, v) <- scalars]
         objectLines = concatMap (\(k, v) -> prettyPrintTomlWithPath (path ++ [k]) v) objects
-        tableHeader = if null path then "" else "[" ++ intercalate "." path ++ "]\n"
+        tableHeader = if Prelude.null path then "" else "[" ++ intercalate "." path ++ "]\n"
      in tableHeader
             ++ intercalate "\n" scalarLines
-            ++ (if null scalarLines || null objectLines then "" else "\n")
+            ++ (if Prelude.null scalarLines || Prelude.null objectLines then "" else "\n")
             ++ objectLines
   where
     partitionScalarsAndObjects ::

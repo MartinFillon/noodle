@@ -1,21 +1,20 @@
-module Noodle.Serialize(Serialize(..)) where
+module Noodle.Serialize (Serialize (..)) where
 
 import GHC.Generics (
-    M1(..),
-    V1,
     Generic (..),
-    U1(..),
-    (:+:)(..),
-    (:*:)(..),
-    K1(..),
-    Selector(..),
-    S
+    K1 (..),
+    M1 (..),
+    S,
+    Selector (..),
+    U1 (..),
+    V1,
+    (:*:) (..),
+    (:+:) (..),
  )
 import Noodle.Serializer (Serializer (..))
 
 class Serializer f => Serialize a f where
     serialize :: a -> f
-
     default serialize :: (Generic a, GSerialize (Rep a) f) => a -> f
     serialize x = gSerialize (from x)
 
@@ -39,9 +38,11 @@ instance (Serializer a, GSerialize f a, GSerialize g a) => GSerialize (f :+: g) 
     gSerialize (R1 x) = gSerialize x
 
 instance (Serializer a, Selector s, GSerialize f a) => GSerialize (M1 S s f) a where
-    gSerialize a@(M1 x) | name /= [] = object [(name, gSerialize x)]
-                        | otherwise = gSerialize x
-                        where name = selName a
+    gSerialize a@(M1 x)
+        | name /= [] = object [(name, gSerialize x)]
+        | otherwise = gSerialize x
+      where
+        name = selName a
 
 instance (Serializer f, Serialize c f) => GSerialize (K1 i c) f where
     gSerialize (K1 x) = serialize x

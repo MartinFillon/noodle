@@ -14,4 +14,3 @@ class Serializer s where
     merge :: s -> s -> s
 
     null :: s
-

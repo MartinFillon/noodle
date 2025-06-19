@@ -47,9 +47,6 @@ instance (Serializer a, Selector s, GSerialize f a) => GSerialize (M1 S s f) a w
 instance (Serializer f, Serialize c f) => GSerialize (K1 i c) f where
     gSerialize (K1 x) = serialize x
 
-instance Serializer f => Serialize Double f where
-    serialize = number
-
 instance Serializer f => Serialize Bool f where
     serialize = bool
 
@@ -61,3 +58,10 @@ instance (Serializer f, Serialize a f) => Serialize [a] f where
 
 instance (Integral a, Serializer f) => Serialize a f where
     serialize = number . fromIntegral
+
+instance (Serializer f, Serialize a f, Serialize b f) => Serialize (Either a b) f
+instance (Serializer f, Serialize a f) => Serialize (Maybe a) f
+instance (Serializer f, Serialize a f, Serialize b f) => Serialize (a, b) f
+instance
+    (Serializer f, Serialize a f, Serialize b f, Serialize c f) =>
+    Serialize (a, b, c) f

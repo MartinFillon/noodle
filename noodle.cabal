@@ -23,6 +23,7 @@ library
     Noodle.Json
     Noodle.Serializer
     Noodle.Yaml
+    Noodle.Toml
   build-depends:       base >= 4.7 && < 5
   default-language:    Haskell2010
   ghc-options:         -Wall

@@ -17,7 +17,7 @@ extra-source-files:  README.md
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
+  exposed-modules:     Noodle
   build-depends:       base >= 4.7 && < 5
                        , syb
   default-language:    Haskell2010
@@ -30,6 +30,14 @@ library
                        -Wmissing-home-modules
                        -Wpartial-fields
                        -Wredundant-constraints
+                       -XDeriveGeneric
+                       -XEmptyCase
+                       -XDefaultSignatures
+                       -XTypeOperators
+                       -XOverlappingInstances
+                       -XFlexibleContexts
+                       -XInstanceSigs
+                       -XFlexibleInstances
 
 source-repository head
   type:     git

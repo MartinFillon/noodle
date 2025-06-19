@@ -1,82 +1,107 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE EmptyCase #-}
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE OverlappingInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Lib where
 
-import Data.Data
-import Object (Object (..))
-import Serialize (Serialize (..))
-import Utils (maybeToEither)
+import GHC.Generics
+import Data.List
 
-data Json = O [(String, Json)] | S String | N Double | B Bool | Null | A [Json]
-    deriving (Data)
+data Json = JObject [(String, Json)] | JString String | JNumber Double | JBool Bool | Null | JArray [Json]
+    deriving (Show)
 
-instance Show Json where
-    show :: Json -> String
-    show (S s) = show s
-    show (N d) = show d
-    show (B False) = "false"
-    show (B True) = "true"
-    show Null = "null"
-    show (A a) = show a
-    show (O (x : xs)) = '{' : foldr (\n acc -> acc ++ ',' : disp n) (disp x) xs ++ "}"
-      where
-        disp (a, b) = show a ++ ':' : show b
-    show (O []) = "{}"
+prettyPrintJson :: Json -> String
+prettyPrintJson = prettyPrintJsonWithIndent 0
 
-instance Object Json where
-    get :: String -> Json -> Either String Json
-    get s (O n) = maybeToEither (s ++ " not found in object.") $ lookup s n
-    get _ _ = Left "Object is not indexable by string."
+prettyPrintJsonWithIndent :: Int -> Json -> String
+prettyPrintJsonWithIndent indent json = case json of
+    JObject kvs ->
+        let indentStr = replicate indent ' '
+            nextIndent = indent + 2
+            entries = [indentStr ++ "  " ++ show k ++ ": " ++ prettyPrintJsonWithIndent nextIndent v | (k, v) <- kvs]
+        in "{\n" ++ intercalate ",\n" entries ++ "\n" ++ indentStr ++ "}"
+    JArray xs ->
+        let indentStr = replicate indent ' '
+            nextIndent = indent + 2
+            entries = [replicate nextIndent ' ' ++ prettyPrintJsonWithIndent nextIndent v | v <- xs]
+        in "[\n" ++ intercalate ",\n" entries ++ "\n" ++ indentStr ++ "]"
+    JString s -> show s
+    JNumber n -> show n
+    JBool b   -> if b then "true" else "false"
+    Null      -> "null"
 
-    asBool :: Json -> Either String Bool
-    asBool (B b) = Right b
-    asBool _ = Left "Not a boolean"
-
-    asDouble :: Json -> Either String Double
-    asDouble (N d) = Right d
-    asDouble _ = Left "Not a number"
-
-    asString :: Json -> Either String String
-    asString (S s) = Right s
-    asString _ = Left "Not a string"
-
-    asArray :: Json -> Either String [Json]
-    asArray (A a) = Right a
-    asArray _ = Left "Not an array"
-
-    asObject :: Json -> Either String Json
-    asObject (O o) = Right (O o)
-    asObject _ = Left "Not an object"
-
-    wrapInObject :: [(String, Json)] -> Json
-    wrapInObject = O
-
-    makeNumber :: Double -> Json
-    makeNumber = N
-
-    makeBool :: Bool -> Json
-    makeBool = B
-
-class Deserializable t where
-    from :: Object f => f -> Either String t
+merge :: Json -> Json -> Json
+merge (JObject x) (JObject y) = JObject (x ++ y)
+merge (JArray x) (JArray y) = JArray (x ++ y)
+merge (JArray x) y = JArray (y : x)
+merge x y = JArray [x, y]
 
 data Test = Test
     { foo :: Double,
       bar :: Bool
     }
-    deriving (Show, Data)
+    deriving (Show, Generic)
 
-instance Deserializable Test where
-    from :: Object f => f -> Either String Test
-    from object = get "foo" object >>= (\j -> get "bar" object >>= construct j)
-      where
-        construct :: Object f => f -> f -> Either String Test
-        construct d b = Test <$> asDouble d <*> asBool b
+data Person = Person {
+    age :: Age,
+    name :: String,
+    bar' :: Test
+} deriving (Show, Generic)
 
-instance Serialize Test Json
+data Age = Age Double deriving (Show, Generic)
+
+data T2 = T2 deriving (Show, Generic)
+
+data T3 deriving (Generic)
+
+class Serialize a where
+    toJson :: a -> Json
+
+    default toJson :: (Generic a, GSerialize (Rep a)) => a -> Json
+    toJson x = serialize (from x)
+
+class GSerialize a where
+    serialize :: a b -> Json
+
+instance GSerialize V1 where
+    serialize x = case x of {}
+
+instance GSerialize U1 where
+    serialize _ = Null
+
+instance (GSerialize f) => GSerialize (M1 i t f) where
+    serialize (M1 x) = serialize x
+
+instance (GSerialize f, GSerialize g) => GSerialize (f :*: g) where
+    serialize (f :*: g) = merge (serialize f) (serialize g)
+
+instance (Selector s, GSerialize f) => GSerialize (M1 S s f) where
+    serialize a@(M1 x)  | name /= [] = JObject [(name, serialize x)]
+                        | otherwise = serialize x
+                        where name = selName a
+
+instance (Serialize c) => GSerialize (K1 i c) where
+    serialize (K1 x) = toJson x
+
+instance Serialize Double where
+    toJson = JNumber
+
+instance Serialize Bool where
+    toJson = JBool
+
+instance Serialize String where
+    toJson = JString
+
+instance Serialize T2
+instance Serialize Age
+instance Serialize Test
+instance Serialize Person
 
 main :: IO ()
 main = do
-    print (to (Test 1 False) :: Json)
+    print "hello"

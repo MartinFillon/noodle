@@ -58,7 +58,7 @@ prettyPrintTomlWithPath path (TObject kvs) =
                     _ -> ((k, v) : scalars, objects)
             )
             ([], [])
-prettyPrintTomlWithPath path (TArray xs) =
+prettyPrintTomlWithPath _ (TArray xs) =
     "[" ++ intercalate ", " (map prettyValue xs) ++ "]"
 prettyPrintTomlWithPath _ (TString s) = show s
 prettyPrintTomlWithPath _ (TNumber n) = show n

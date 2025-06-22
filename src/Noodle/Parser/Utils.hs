@@ -41,7 +41,9 @@ lexeme :: Parser a -> Parser a
 lexeme = L.lexeme sc
 
 parseNumber :: Parser Double
-parseNumber = L.signed sce L.float
+parseNumber =(
+    try (L.signed sce L.float) <|> fromIntegral
+        <$> (L.signed sce L.decimal :: Parser Integer)) <?> "Number"
 
 parseString :: Parser String
 parseString =
@@ -70,4 +72,11 @@ parseFalse :: Parser Bool
 parseFalse = lexeme $ string "false" >> return False
 
 parseBool :: Parser Bool
-parseBool = lexeme (choice [parseTrue, parseFalse]) <?> "Boolean"
+parseBool =
+    lexeme
+        ( choice
+            [ try parseTrue,
+              try parseFalse
+            ]
+        )
+        <?> "Boolean"

@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections #-}
 
 module Noodle.Json (Json (..), prettyPrintJson, parseJson, parseValue) where
 
@@ -14,7 +13,7 @@ import Noodle.Parser.Utils (
     sc,
  )
 import Noodle.Serializer (Serializer (..))
-import Text.Megaparsec (MonadParsec (eof), between, choice, parse, sepBy)
+import Text.Megaparsec (MonadParsec (..), between, choice, parse, sepBy)
 import Text.Megaparsec.Char as MC
 
 data Json
@@ -88,37 +87,49 @@ parseJsonNull :: Parser Json
 parseJsonNull = lexeme $ MC.string "null" >> return Null
 
 parseJsonBool :: Parser Json
-parseJsonBool = lexeme $ JBool <$> parseBool
+parseJsonBool = lexeme (JBool <$> parseBool)
 
 parseArray :: Parser Json
 parseArray =
-    JArray
-        <$> lexeme
-            ( between (char '[') (char ']') (parseValue `sepBy` lexeme ",")
-            )
+    lexeme $
+        JArray
+            <$> lexeme
+                ( between
+                    (lexeme $ char '[')
+                    (lexeme $ char ']')
+                    (lexeme parseValue `sepBy` lexeme ",")
+                )
 
 parseObjectItem :: Parser (String, Json)
-parseObjectItem =
-    lexeme (parseString >>= (\n -> lexeme $ char ':' >> parseObjectValue n))
+parseObjectItem = try $ do
+    n <- lexeme parseString
+    _ <- lexeme (char ':')
+    v <- parseObjectValue
+    return (n, v)
 
-parseObjectValue :: String -> Parser (String, Json)
-parseObjectValue n = lexeme $ (n,) <$> lexeme parseValue
+parseObjectValue :: Parser Json
+parseObjectValue = lexeme parseValue
 
 parseObject :: Parser Json
 parseObject =
     JObject
-        <$> lexeme (between (char '{') (char '}') (parseObjectItem `sepBy` lexeme ","))
+        <$> lexeme
+            ( between
+                (char '{')
+                (char '}')
+                (parseObjectItem `sepBy` lexeme ",")
+            )
 
 parseValue :: Parser Json
 parseValue =
     lexeme $
         choice
-            [ parseObject,
-              parseArray,
-              parseJsonNumber,
-              parseJsonString,
-              parseJsonNull,
-              parseJsonBool
+            [ try parseObject,
+              try parseArray,
+              try parseJsonNumber,
+              try parseJsonString,
+              try parseJsonNull,
+              try parseJsonBool
             ]
 
 parseJson :: String -> Either ParserError Json

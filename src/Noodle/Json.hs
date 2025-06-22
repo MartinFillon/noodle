@@ -115,8 +115,8 @@ parseObject =
     JObject
         <$> lexeme
             ( between
-                (char '{')
-                (char '}')
+                (lexeme $ char '{')
+                (lexeme $ char '}')
                 (parseObjectItem `sepBy` lexeme ",")
             )
 

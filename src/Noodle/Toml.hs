@@ -29,7 +29,10 @@ instance Serializer Toml where
     array = TArray
 
     merge :: Toml -> Toml -> Toml
-    merge = merge'
+    merge (TObject x) (TObject y) = TObject (x ++ y)
+    merge (TArray x) (TArray y) = TArray (x ++ y)
+    merge (TArray x) y = TArray (x ++ [y])
+    merge x y = TArray [x, y]
 
     null :: Toml
     null = TNull -- TOML doesn't really support null, this is placeholder
@@ -75,9 +78,3 @@ prettyValue TNull = "null"
 prettyValue (TArray xs) = "[" ++ intercalate ", " (map prettyValue xs) ++ "]"
 prettyValue (TObject kvs) =
     "{ " ++ intercalate ", " [k ++ " = " ++ prettyValue v | (k, v) <- kvs] ++ " }"
-
-merge' :: Toml -> Toml -> Toml
-merge' (TObject x) (TObject y) = TObject (x ++ y)
-merge' (TArray x) (TArray y) = TArray (x ++ y)
-merge' (TArray x) y = TArray (x ++ [y])
-merge' x y = TArray [x, y]

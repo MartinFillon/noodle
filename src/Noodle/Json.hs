@@ -3,6 +3,7 @@
 module Noodle.Json (Json (..), prettyPrintJson, parseJson, parseValue) where
 
 import Data.List (intercalate)
+import Noodle.Deserializer (Deserializer (..))
 import Noodle.Parser.Utils (
     Parser,
     ParserError,
@@ -21,7 +22,7 @@ data Json
     | JString String
     | JNumber Double
     | JBool Bool
-    | Null
+    | JNull
     | JArray [Json]
     deriving (Show, Eq)
 
@@ -42,10 +43,38 @@ instance Serializer Json where
     array = JArray
 
     merge :: Json -> Json -> Json
-    merge = merge'
+    merge (JObject x) (JObject y) = JObject (x ++ y)
+    merge (JArray x) (JArray y) = JArray (x ++ y)
+    merge (JArray x) y = JArray (y : x)
+    merge x y = JArray [x, y]
 
     null :: Json
-    null = Null
+    null = JNull
+
+instance Deserializer Json where
+    getObject :: Json -> Either String [(String, Json)]
+    getObject (JObject x) = Right x
+    getObject _ = Left "Not an object"
+
+    getNumber :: Json -> Either String Double
+    getNumber (JNumber x) = Right x
+    getNumber _ = Left "Not a number"
+
+    getArray :: Json -> Either String [Json]
+    getArray (JArray x) = Right x
+    getArray _ = Left "Not an number"
+
+    getString :: Json -> Either String String
+    getString (JString x) = Right x
+    getString _ = Left "Not a string"
+
+    getBool :: Json -> Either String Bool
+    getBool (JBool b) = Right b
+    getBool _ = Left "Not a boolean"
+
+    getNull :: Json -> Either String ()
+    getNull JNull = Right ()
+    getNull _ = Left "Not a null"
 
 prettyPrintJson :: Json -> String
 prettyPrintJson = prettyPrintJsonWithIndent 0
@@ -69,13 +98,7 @@ prettyPrintJsonWithIndent _ (JString s) = show s
 prettyPrintJsonWithIndent _ (JNumber n) = show n
 prettyPrintJsonWithIndent _ (JBool True) = "true"
 prettyPrintJsonWithIndent _ (JBool False) = "true"
-prettyPrintJsonWithIndent _ Null = "null"
-
-merge' :: Json -> Json -> Json
-merge' (JObject x) (JObject y) = JObject (x ++ y)
-merge' (JArray x) (JArray y) = JArray (x ++ y)
-merge' (JArray x) y = JArray (y : x)
-merge' x y = JArray [x, y]
+prettyPrintJsonWithIndent _ JNull = "null"
 
 parseJsonNumber :: Parser Json
 parseJsonNumber = lexeme $ JNumber <$> parseNumber
@@ -84,7 +107,7 @@ parseJsonString :: Parser Json
 parseJsonString = lexeme $ JString <$> parseString
 
 parseJsonNull :: Parser Json
-parseJsonNull = lexeme $ MC.string "null" >> return Null
+parseJsonNull = lexeme $ MC.string "null" >> return JNull
 
 parseJsonBool :: Parser Json
 parseJsonBool = lexeme (JBool <$> parseBool)

@@ -29,7 +29,10 @@ instance Serializer Yaml where
     array = YArray
 
     merge :: Yaml -> Yaml -> Yaml
-    merge = merge'
+    merge (YObject x) (YObject y) = YObject (x ++ y)
+    merge (YArray x) (YArray y) = YArray (x ++ y)
+    merge (YArray x) y = YArray (x ++ [y])
+    merge x y = YArray [x, y]
 
     null :: Yaml
     null = YNull
@@ -60,9 +63,3 @@ prettyPrintYamlWithIndent _ (YNumber n) = show n
 prettyPrintYamlWithIndent _ (YBool True) = "true"
 prettyPrintYamlWithIndent _ (YBool False) = "false"
 prettyPrintYamlWithIndent _ YNull = "null"
-
-merge' :: Yaml -> Yaml -> Yaml
-merge' (YObject x) (YObject y) = YObject (x ++ y)
-merge' (YArray x) (YArray y) = YArray (x ++ y)
-merge' (YArray x) y = YArray (x ++ [y])
-merge' x y = YArray [x, y]

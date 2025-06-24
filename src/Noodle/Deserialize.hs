@@ -9,8 +9,6 @@
 module Noodle.Deserialize (Deserialize (..)) where
 
 import GHC.Generics (
-    C,
-    D,
     Generic (..),
     K1 (..),
     M1 (..),
@@ -22,7 +20,6 @@ import GHC.Generics (
     (:+:) (..),
  )
 
-import Debug.Trace (traceShow)
 import Noodle.Deserializer (
     Deserializer (..),
  )
@@ -63,30 +60,27 @@ instance (Deserializer a, GDeserialize f a) => GDeserialize (M1 c t f) a where
         a -> Either String (M1 c t f b)
     gDeserialize x = M1 <$> gDeserialize x
 
--- instance (Deserializer a, Selector s, GDeserialize f a) => GDeserialize (M1 S s f) a where
---     gDeserialize ::
---         a ->
---         Either String (M1 S s f b)
---     gDeserialize x =
---         fixProxy
---             ( \proxy -> case selName proxy of
---                 n ->
---                     getObject x
---                         >>= serializeSubItem n
---             )
---       where
---         fixProxy :: (a -> f a) -> f a
---         fixProxy f = f undefined
+instance (Deserializer a, Selector s, GDeserialize f a) => GDeserialize (M1 S s f) a where
+    gDeserialize ::
+        a ->
+        Either String (M1 S s f b)
+    gDeserialize x =
+        fixProxy
+            ( \proxy -> case selName proxy of
+                [] -> M1 <$> gDeserialize x
+                n ->
+                    M1
+                        <$> ( getObject x
+                                >>= lookupE n
+                                >>= gDeserialize
+                            )
+            )
+      where
+        fixProxy :: (a -> f a) -> f a
+        fixProxy f = f undefined
 
---         serializeSubItem ::
---             (Deserializer a, Selector s, GDeserialize f a) =>
---             String ->
---             [(String, a)] ->
---             Either String (M1 S s f b)
---         serializeSubItem n o = lookupE n o >>= gDeserialize
-
--- lookupE :: (Ord k, Show k) => k -> [(k, v)] -> Either String v
--- lookupE k = maybe (Left $ "Key not found: " ++ show k) Right . lookup k
+lookupE :: (Ord k, Show k) => k -> [(k, v)] -> Either String v
+lookupE k = maybe (Left $ "Key not found: " ++ show k) Right . lookup k
 
 instance (Deserializer f, Deserialize c f) => GDeserialize (K1 i c) f where
     gDeserialize ::

@@ -9,8 +9,9 @@ Example Usage :
 import GHC.Generics (Generic)
 import Noodle.Json (prettyPrintJson, Json)
 import Noodle.Yaml (prettyPrintYaml, Yaml)
-import Noodle.Serialize (Serialize (serialize))
-import Noodle.Serializer (Serializer)
+import Noodle.Serialize (Serialize (..))
+import Noodle.Deserialize (Serialize (..))
+import Noodle.Deserializer (Deserializer)
 
 data Test = Test
     { foo :: Double,
@@ -34,11 +35,14 @@ instance Serializer f => Serialize Age f
 instance Serializer f => Serialize Test f
 instance Serializer f => Serialize Person f
 
+instance Deserializer f => Deserialize T2 f
+instance Deserializer f => Deserialize Age f
+instance Deserializer f => Deserialize Test f
+instance Deserializer f => Deserialize Person f
+
 testJson :: Serialize a Json => a -> IO ()
 testJson = putStrLn . prettyPrintJson . serialize
 
 testYaml :: Serialize a Yaml => a -> IO ()
 testYaml = putStrLn . prettyPrintYaml . serialize
 ```
-
-Currently, only arrays, booleans, int, double, string are suported from prelude

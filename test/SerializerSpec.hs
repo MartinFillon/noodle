@@ -16,9 +16,9 @@ import Noodle.Yaml (Yaml (..))
 
 spec :: Spec
 spec = do
-    describe "test json" (testSerializer @Json)
-    describe "test yaml" (testSerializer @Yaml)
-    describe "test toml" (testSerializer @Toml)
+    describe "Json" (testSerializer @Json)
+    describe "Yaml" (testSerializer @Yaml)
+    describe "Toml" (testSerializer @Toml)
 
 data T1 = T1 Int deriving (Generic)
 

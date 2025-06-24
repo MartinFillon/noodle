@@ -1,10 +1,8 @@
 {-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 
 module Noodle.Deserialize (Deserialize (..)) where
 
@@ -20,6 +18,7 @@ import GHC.Generics (
     (:+:) (..),
  )
 
+import GHC.Float (double2Int)
 import Noodle.Deserializer (
     Deserializer (..),
  )
@@ -100,3 +99,17 @@ instance Deserializer f => Deserialize String f where
     deserialize = getString
 
 instance (Deserializer f, Deserialize a f, Deserialize b f) => Deserialize (Either a b) f
+
+instance (Deserializer f, Deserialize a f) => Deserialize [a] f where
+    deserialize :: f -> Either String [a]
+    deserialize x = getArray x >>= mapM deserialize
+
+instance (Integral a, Deserializer f) => Deserialize a f where
+    deserialize :: f -> Either String a
+    deserialize x = fromIntegral . double2Int <$> getNumber x
+
+instance (Deserializer f, Deserialize a f) => Deserialize (Maybe a) f
+instance (Deserializer f, Deserialize a f, Deserialize b f) => Deserialize (a, b) f
+instance
+    (Deserializer f, Deserialize a f, Deserialize b f, Deserialize c f) =>
+    Deserialize (a, b, c) f

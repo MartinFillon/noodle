@@ -1,6 +1,6 @@
 module Noodle.Deserializer (Deserializer (..)) where
 
-class Deserializer a where
+class Show a => Deserializer a where
     getObject :: a -> Either String [(String, a)]
 
     getNumber :: a -> Either String Double

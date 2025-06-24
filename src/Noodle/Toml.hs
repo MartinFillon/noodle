@@ -1,6 +1,7 @@
 module Noodle.Toml (Toml (..), prettyPrintToml) where
 
 import Data.List (intercalate)
+import Noodle.Deserializer (Deserializer (..))
 import Noodle.Serializer (Serializer (..))
 
 data Toml
@@ -36,6 +37,31 @@ instance Serializer Toml where
 
     null :: Toml
     null = TNull -- TOML doesn't really support null, this is placeholder
+
+instance Deserializer Toml where
+    getObject :: Toml -> Either String [(String, Toml)]
+    getObject (TObject x) = Right x
+    getObject _ = Left "Not an object"
+
+    getNumber :: Toml -> Either String Double
+    getNumber (TNumber x) = Right x
+    getNumber _ = Left "Not a number"
+
+    getArray :: Toml -> Either String [Toml]
+    getArray (TArray x) = Right x
+    getArray _ = Left "Not an number"
+
+    getString :: Toml -> Either String String
+    getString (TString x) = Right x
+    getString _ = Left "Not a string"
+
+    getBool :: Toml -> Either String Bool
+    getBool (TBool b) = Right b
+    getBool _ = Left "Not a boolean"
+
+    getNull :: Toml -> Either String ()
+    getNull TNull = Right ()
+    getNull _ = Left "Not a null"
 
 prettyPrintToml :: Toml -> String
 prettyPrintToml = prettyPrintTomlWithPath []

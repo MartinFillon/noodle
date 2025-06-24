@@ -3,7 +3,6 @@
 module Noodle.Json (Json (..), prettyPrintJson, parseJson, parseValue) where
 
 import Data.List (intercalate)
-import Debug.Trace (traceShow)
 import Noodle.Deserializer (Deserializer (..))
 import Noodle.Parser.Utils (
     Parser,
@@ -55,7 +54,7 @@ instance Serializer Json where
 instance Deserializer Json where
     getObject :: Json -> Either String [(String, Json)]
     getObject (JObject x) = Right x
-    getObject x = traceShow x Left "Not an object"
+    getObject _ = Left "Not an object"
 
     getNumber :: Json -> Either String Double
     getNumber (JNumber x) = Right x

@@ -1,6 +1,7 @@
 module Noodle.Yaml (Yaml (..), prettyPrintYaml) where
 
 import Data.List (intercalate)
+import Noodle.Deserializer (Deserializer (..))
 import Noodle.Serializer (Serializer (..))
 
 data Yaml
@@ -36,6 +37,31 @@ instance Serializer Yaml where
 
     null :: Yaml
     null = YNull
+
+instance Deserializer Yaml where
+    getObject :: Yaml -> Either String [(String, Yaml)]
+    getObject (YObject x) = Right x
+    getObject _ = Left "Not an object"
+
+    getNumber :: Yaml -> Either String Double
+    getNumber (YNumber x) = Right x
+    getNumber _ = Left "Not a number"
+
+    getArray :: Yaml -> Either String [Yaml]
+    getArray (YArray x) = Right x
+    getArray _ = Left "Not an number"
+
+    getString :: Yaml -> Either String String
+    getString (YString x) = Right x
+    getString _ = Left "Not a string"
+
+    getBool :: Yaml -> Either String Bool
+    getBool (YBool b) = Right b
+    getBool _ = Left "Not a boolean"
+
+    getNull :: Yaml -> Either String ()
+    getNull YNull = Right ()
+    getNull _ = Left "Not a null"
 
 prettyPrintYaml :: Yaml -> String
 prettyPrintYaml = prettyPrintYamlWithIndent 0

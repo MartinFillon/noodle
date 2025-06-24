@@ -24,6 +24,9 @@ library
     Noodle.Serializer
     Noodle.Yaml
     Noodle.Toml
+    Noodle.Deserialize
+    Noodle.Deserializer
+    Noodle.Parser.Utils
   build-depends:       base >= 4.7 && < 5
                       , megaparsec
                       , mtl

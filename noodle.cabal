@@ -20,13 +20,18 @@ library
   exposed-modules:
     Noodle
     Noodle.Serialize
-    Noodle.Json
     Noodle.Serializer
-    Noodle.Yaml
-    Noodle.Toml
     Noodle.Deserialize
     Noodle.Deserializer
     Noodle.Parser.Utils
+    Noodle.Json
+    Noodle.Json.Type
+    Noodle.Json.Parser
+    Noodle.Yaml
+    Noodle.Yaml.Type
+    Noodle.Yaml.Parser
+    Noodle.Toml
+    Noodle.Toml.Type
   build-depends:       base >= 4.7 && < 5
                       , megaparsec
                       , mtl

@@ -14,53 +14,59 @@ import Noodle.Parser.Utils (
  )
 import Text.Megaparsec (MonadParsec (..), between, choice, parse, sepBy)
 import Text.Megaparsec.Char as MC
+import qualified Text.Megaparsec.Char.Lexer as L
+
+jsc :: Parser ()
+jsc = sc (L.skipLineComment "//")
 
 parseJsonNumber :: Parser Json
-parseJsonNumber = lexeme $ JNumber <$> parseNumber
+parseJsonNumber = lexeme jsc $ JNumber <$> parseNumber jsc
 
 parseJsonString :: Parser Json
-parseJsonString = lexeme $ JString <$> parseString
+parseJsonString = lexeme jsc $ JString <$> parseString jsc
 
 parseJsonNull :: Parser Json
-parseJsonNull = lexeme $ MC.string "null" >> return JNull
+parseJsonNull = lexeme jsc $ MC.string "null" >> return JNull
 
 parseJsonBool :: Parser Json
-parseJsonBool = lexeme (JBool <$> parseBool)
+parseJsonBool = lexeme jsc (JBool <$> parseBool jsc)
 
 parseArray :: Parser Json
 parseArray =
-    lexeme $
+    lexeme jsc $
         JArray
             <$> lexeme
+                jsc
                 ( between
-                    (lexeme $ char '[')
-                    (lexeme $ char ']')
-                    (lexeme parseValue `sepBy` lexeme ",")
+                    (lexeme jsc $ char '[')
+                    (lexeme jsc $ char ']')
+                    (lexeme jsc parseValue `sepBy` lexeme jsc ",")
                 )
 
 parseObjectItem :: Parser (String, Json)
 parseObjectItem = try $ do
-    n <- lexeme parseString
-    _ <- lexeme (char ':')
+    n <- lexeme jsc $ parseString jsc
+    _ <- lexeme jsc $ char ':'
     v <- parseObjectValue
     return (n, v)
 
 parseObjectValue :: Parser Json
-parseObjectValue = lexeme parseValue
+parseObjectValue = lexeme jsc parseValue
 
 parseObject :: Parser Json
 parseObject =
     JObject
         <$> lexeme
+            jsc
             ( between
-                (lexeme $ char '{')
-                (lexeme $ char '}')
-                (parseObjectItem `sepBy` lexeme ",")
+                (lexeme jsc $ char '{')
+                (lexeme jsc $ char '}')
+                (parseObjectItem `sepBy` lexeme jsc ",")
             )
 
 parseValue :: Parser Json
 parseValue =
-    lexeme $
+    lexeme jsc $
         choice
             [ try parseObject,
               try parseArray,
@@ -71,4 +77,4 @@ parseValue =
             ]
 
 parseJson :: String -> Either ParserError Json
-parseJson = parse (between sc eof parseValue) ""
+parseJson = parse (between jsc eof parseValue) ""

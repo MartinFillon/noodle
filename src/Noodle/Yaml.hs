@@ -1,6 +1,7 @@
-module Noodle.Yaml (Yaml (..), prettyPrintYaml) where
+module Noodle.Yaml (Yaml (..), prettyPrintYaml, parseYaml) where
 
 import Data.List (intercalate)
+import Noodle.Yaml.Parser (parseYaml)
 import Noodle.Yaml.Type (Yaml (..))
 
 prettyPrintYaml :: Yaml -> String

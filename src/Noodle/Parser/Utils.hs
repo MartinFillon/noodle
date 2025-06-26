@@ -7,6 +7,7 @@ module Noodle.Parser.Utils (
     ParserError,
     parseString,
     parseBool,
+    parseEscapedChar,
 ) where
 
 import Control.Applicative (Alternative (..))
@@ -27,33 +28,38 @@ import Text.Megaparsec.Error (ParseErrorBundle)
 type Parser = Parsec Void String
 type ParserError = ParseErrorBundle String Void
 
-sc :: Parser ()
-sc =
+sc :: Parser () -> Parser ()
+sc lineComment =
     L.space
         (void $ some (char ' ' <|> char '\t' <|> char '\n' <|> char '\r'))
-        empty
+        lineComment
         empty
 
 sce :: Parser ()
 sce = L.space empty empty empty
 
-lexeme :: Parser a -> Parser a
-lexeme = L.lexeme sc
+lexeme :: Parser () -> Parser a -> Parser a
+lexeme = L.lexeme
 
-parseNumber :: Parser Double
-parseNumber =(
-    try (L.signed sce L.float) <|> fromIntegral
-        <$> (L.signed sce L.decimal :: Parser Integer)) <?> "Number"
-
-parseString :: Parser String
-parseString =
-    between
-        (char '\"')
-        (char '\"')
-        ( (:)
-            <$> (try parseEscapedChar <|> noneOf ("\"" :: [Char]))
-            <*> many (try parseEscapedChar <|> noneOf ("\"" :: [Char]))
+parseNumber :: Parser () -> Parser Double
+parseNumber sc' =
+    lexeme
+        sc'
+        ( try (L.signed sce L.float) <|> fromIntegral
+            <$> (L.signed sce L.decimal :: Parser Integer)
         )
+        <?> "Number"
+
+parseString :: Parser () -> Parser String
+parseString sc' =
+    lexeme sc' $
+        between
+            (char '\"')
+            (char '\"')
+            ( (:)
+                <$> (try parseEscapedChar <|> noneOf ("\"" :: [Char]))
+                <*> many (try parseEscapedChar <|> noneOf ("\"" :: [Char]))
+            )
 
 parseEscapedChar :: Parser Char
 parseEscapedChar =
@@ -65,18 +71,19 @@ parseEscapedChar =
           try (string "\\\\" >> return '\\')
         ]
 
-parseTrue :: Parser Bool
-parseTrue = lexeme $ string "true" >> return True
+parseTrue :: Parser () -> Parser Bool
+parseTrue sc' = lexeme sc' $ string "true" >> return True
 
-parseFalse :: Parser Bool
-parseFalse = lexeme $ string "false" >> return False
+parseFalse :: Parser () -> Parser Bool
+parseFalse sc' = lexeme sc' $ string "false" >> return False
 
-parseBool :: Parser Bool
-parseBool =
+parseBool :: Parser () -> Parser Bool
+parseBool sc' =
     lexeme
+        sc'
         ( choice
-            [ try parseTrue,
-              try parseFalse
+            [ try $ parseTrue sc',
+              try $ parseFalse sc'
             ]
         )
         <?> "Boolean"

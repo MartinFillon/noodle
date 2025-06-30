@@ -29,7 +29,7 @@ test input parser = do
         Right result -> print result
 
 t1 :: String
-t1 = "key:\n - 1\n - 2\n - 3\n"
+t1 = "- t1\n- 2\n- 3\n"
 
 t2 :: String
 t2 =
@@ -40,8 +40,9 @@ t2 =
 t3 :: String
 t3 =
     "- 1\n"
-        -- ++ "- 2\n"
-        -- ++ "- 3\n"
-        -- ++ "- \n"
-        -- ++ "  - 4\n"
-        -- ++ "  - 5\n"
+
+-- ++ "- 2\n"
+-- ++ "- 3\n"
+-- ++ "- \n"
+-- ++ "  - 4\n"
+-- ++ "  - 5\n"

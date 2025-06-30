@@ -6,6 +6,7 @@ module Noodle.Yaml.Parser (parseYaml) where
 import Control.Arrow (Arrow (..))
 import Control.Monad (void)
 import Data.Functor (($>))
+import Debug.Trace (trace, traceShow)
 import Noodle.Parser.Utils (
     Parser,
     ParserError,
@@ -30,9 +31,13 @@ import Text.Megaparsec (
  )
 import Text.Megaparsec.Char (char, space1)
 import qualified Text.Megaparsec.Char.Lexer as L
+import Text.Megaparsec.Debug (dbg)
+
+comment :: Parser ()
+comment = L.skipLineComment "#"
 
 ysc :: Parser ()
-ysc = sc (L.skipLineComment "#")
+ysc = sc comment
 
 parseYBoolean :: Parser () -> Parser Yaml
 parseYBoolean x = lexeme x $ YBool <$> parseBool x
@@ -49,81 +54,61 @@ parseYString x =
                 )
 
 yscn :: Parser ()
-yscn = L.space space1 (L.skipLineComment "#") empty
+yscn = L.space space1 comment empty
 
 ysc' :: Parser ()
-ysc' = L.space (void $ some (char ' ' <|> char '\t')) (L.skipLineComment "#") empty
+ysc' = L.space (void $ some (char ' ' <|> char '\t')) comment empty
 
-parseKey :: Parser () -> Parser String
-parseKey x =
-    lexeme x $
-        some
-            (try parseEscapedChar <|> noneOf (":\n \t\r#" :: String))
-            >>= (\key -> char ':' $> key)
+-- parseKey :: Parser () -> Parser String
+-- parseKey x =
+--     lexeme x $
+--         some
+--             (try parseEscapedChar <|> noneOf (":\n \t\r#" :: String))
+--             >>= (\key -> char ':' $> key)
 
 parseValue :: Parser () -> Parser Yaml
 parseValue x =
     choice $
         map
             try
-            [ parseYArray',
-              parseYBoolean x,
+            [ parseYBoolean x,
               parseYNumber x,
               parseYString x
             ]
 
--- parseObjectItem :: Parser (String, Yaml)
--- parseObjectItem = head <$> L.indentBlock yscn p
---   where
---     p = do
---         name <- parseKey ysc'
---         return
---             ( L.IndentSome
---                 Nothing
---                 return
---                 (parseValue name ysc')
---             )
-
--- parseObject :: String -> Parser (String, Yaml)
--- parseObject name = second YObject <$> L.indentBlock yscn p
---   where
---     p = do
---         return
---             ( L.IndentSome
---                 Nothing
---                 (return . (name,))
---                 parseObjectItem
---             )
-
--- parseObjectStart :: Parser (String, Yaml)
--- parseObjectStart = L.nonIndented yscn p
---   where
---     p = do
---         name <- parseKey ysc'
---         parseObject name
-
 parseYArrayValue :: Parser Yaml
 parseYArrayValue = do
-    _ <- lexeme ysc' $ char '-'
-    parseValue ysc'
+    _ <- dbg "parsing dash" $ lexeme ysc' $ char '-'
+    dbg "parseArrayValue" $ parseValue ysc'
 
 parseYArray' :: Parser Yaml
 parseYArray' =
     YArray
         <$> L.indentBlock yscn p
   where
-    p = do
-        return
-            ( L.IndentMany
+    p =
+        return $
+            L.IndentMany
                 Nothing
                 return
                 parseYArrayValue
-            )
+
 parseYArray :: Parser Yaml
-parseYArray = L.nonIndented yscn parseYArray'
+parseYArray = YArray <$> L.nonIndented yscn (L.indentBlock yscn p)
+  where
+    p =
+        do
+            pos <- L.indentLevel
+            v <- parseYArrayValue
+            return
+                ( L.IndentMany
+                    (Just pos)
+                    (return . (:) v)
+                    parseYArrayValue
+                )
 
 parseStart :: Parser Yaml
-parseStart = parseYArray
+parseStart = dbg "start" $ parseYArray
 
 parseYaml :: String -> Either ParserError Yaml
 parseYaml = parse (between ysc eof parseStart) "test"

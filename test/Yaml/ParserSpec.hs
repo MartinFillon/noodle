@@ -5,7 +5,7 @@ import Test.Hspec (Spec, describe, it, shouldBe)
 
 tests :: [(String, Yaml)]
 tests =
-    [ ("basic.yaml", YObject [("foo", YString "bar")]),
+    [ ("object.yaml", YObject [("foo", YString "bar"), ("baz", YNumber 3.0)]),
       ("string.yaml", YString "hello"),
       ("number.yaml", YNumber 3.0),
       ("array.yaml", YArray [YNumber 1.0, YNumber 2.0, YNumber 3.0]),

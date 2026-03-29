@@ -29,6 +29,38 @@ tests =
                     ]
                 )
             ]
+        ),
+        ( "huge_sub_object.yaml",
+          YObject
+            [   ( "test",
+                  YObject
+                    [ ("depth", YNumber 100.0),
+                      ("foo", YNumber 1.0),
+                      ("bar", YNumber 2.0),
+                      ("baz", YBool True),
+                        ( "qux",
+                          YObject
+                            [   ( "quux",
+                                  YObject
+                                    [   ( "quuz",
+                                          YObject [("quuux", YObject [("quuuux", YString "deeply nested value")])]
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ]
+        ),
+        ( "object_array.yaml",
+          YObject
+            [   ( "a",
+                  YObject
+                    [ ("b", YArray [YNumber 1.0, YNumber 2.0, YObject [("baz", YBool True)]])
+                    ]
+                )
+            ]
         )
     ]
 

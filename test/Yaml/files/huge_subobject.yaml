@@ -1,0 +1,12 @@
+test:
+  depth: 100
+  foo: 1
+  bar: 2
+  baz:
+    true
+  qux:
+    quux:
+      quuz:
+        quuux:
+          quuuux:
+            "deeply nested value"

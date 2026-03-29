@@ -1,7 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections #-}
 
 module Noodle.Yaml.Parser (parseYaml) where
 
+import Control.Monad (void)
+import Data.Bifunctor (second)
 import Noodle.Parser.Utils (
     Parser,
     ParserError,
@@ -17,6 +20,7 @@ import Text.Megaparsec (
     MonadParsec (eof),
     between,
     choice,
+    empty,
     noneOf,
     parse,
     some,
@@ -31,6 +35,9 @@ comment = L.skipLineComment "#"
 
 ysc :: Parser ()
 ysc = sc comment
+
+ysc' :: Parser ()
+ysc' = L.space (void $ some (char ' ' <|> char '\t')) comment empty
 
 parseYBoolean :: Parser () -> Parser Yaml
 parseYBoolean x = lexeme x $ YBool <$> parseBool x
@@ -51,7 +58,8 @@ parseValue x =
     choice $
         map
             try
-            [ parseYBoolean x,
+            [ parseYObject,
+              parseYBoolean x,
               parseYNumber x,
               parseYString x
             ]
@@ -69,18 +77,25 @@ parseYArray =
 parseObjectKey :: Parser String
 parseObjectKey = lexeme ysc $ some (noneOf (":\n\r\t#" :: String))
 
+parseIndentedObjectValue :: String -> Parser (String, Yaml)
+parseIndentedObjectValue key = second YArray <$> parseIndentedObjectValue' key
+
+parseIndentedObjectValue' :: String -> Parser (String, [Yaml])
+parseIndentedObjectValue' key = L.indentBlock ysc' $ do
+    _ <- char ':'
+    return $ L.IndentSome Nothing (return . (key,)) (parseValue ysc')
+
 parseObjectValue :: Parser (String, Yaml)
 parseObjectValue = do
     key <- parseObjectKey
     _ <- lexeme ysc $ char ':'
-    value <- parseValue ysc
-    return (key, value)
+    try ((key,) <$> parseValue ysc) <|> parseIndentedObjectValue key
 
 parseYObject :: Parser Yaml
 parseYObject = YObject <$> some parseObjectValue
 
 parseStart :: Parser Yaml
-parseStart = try parseYArray <|> try parseYObject <|> parseValue ysc
+parseStart = L.nonIndented ysc' (try parseYArray <|> parseValue ysc)
 
 parseYaml :: String -> Either ParserError Yaml
 parseYaml = parse (between ysc eof parseStart) "test"

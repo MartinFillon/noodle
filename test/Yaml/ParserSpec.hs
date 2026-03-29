@@ -9,7 +9,27 @@ tests =
       ("string.yaml", YString "hello"),
       ("number.yaml", YNumber 3.0),
       ("array.yaml", YArray [YNumber 1.0, YNumber 2.0, YNumber 3.0]),
-      ("boolean.yaml", YBool True)
+      ("boolean.yaml", YBool True),
+        ( "nested.yaml",
+          YObject
+            [   ( "test",
+                  YObject [("foo", YNumber 1.0), ("bar", YNumber 2.0), ("baz", YBool True)]
+                )
+            ]
+        ),
+        ( "deep_nested.yaml",
+          YObject
+            [   ( "test",
+                  YObject
+                    [   ( "a",
+                          YObject
+                            [ ("b", YObject [("c", YNumber 1.0), ("d", YNumber 2.0)])
+                            ]
+                        )
+                    ]
+                )
+            ]
+        )
     ]
 
 spec :: Spec

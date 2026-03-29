@@ -10,6 +10,7 @@ module Noodle (
     t1,
     t2,
     t3,
+    testFromFile,
 ) where
 
 import Noodle.Deserialize
@@ -27,6 +28,11 @@ test input parser = do
     case parser input of
         Left err -> putStr $ errorBundlePretty err
         Right result -> print result
+
+testFromFile :: Show a => String -> (String -> Either ParserError a) -> IO ()
+testFromFile file parser = do
+    content <- readFile file
+    test content parser
 
 t1 :: String
 t1 = "- t1\n- 2\n- 3\n"

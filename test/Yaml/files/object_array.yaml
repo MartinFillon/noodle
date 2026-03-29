@@ -1,3 +1,6 @@
-test:
-  1
-bar: helloworld
+a:
+  b:
+    - 1
+    - 2
+    - baz:
+        true

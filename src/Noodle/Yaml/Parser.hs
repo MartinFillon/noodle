@@ -87,7 +87,7 @@ parseObjectDocument' = try (L.indentBlock ysc p) <|> parseObjectValue ysc
     p = do
         key <- parseObjectKey
         _ <- lexeme ysc' $ char ':'
-        return (L.IndentSome Nothing (return . (\x -> (key, head x))) (parseValue ysc'))
+        return (L.IndentSome Nothing (keepFirstItem key) (parseValue ysc'))
 
 parseSubObject :: Parser () -> Parser Yaml
 parseSubObject consumer =
@@ -97,7 +97,15 @@ parseSubObject consumer =
         key <- parseObjectKey
         _ <- lexeme consumer $ char ':'
         return
-            (L.IndentSome Nothing (return . (\x -> (key, head x))) (parseValue consumer))
+            (L.IndentSome Nothing (keepFirstItem key) (parseValue consumer))
+
+keepFirstItem :: String -> [a] -> Parser (String, a)
+keepFirstItem key (x : _) = return (key, x)
+keepFirstItem _ [] = fail "Expected at least one item in the object"
+
+head' :: [a] -> Parser a
+head' (x : _) = return x
+head' [] = fail "Expected at least one item in the array"
 
 parseSubArray :: Parser () -> Parser Yaml
 parseSubArray consumer =
@@ -105,7 +113,7 @@ parseSubArray consumer =
   where
     p = do
         _ <- lexeme consumer $ char '-'
-        return (L.IndentSome Nothing (return . head) (parseValue consumer))
+        return (L.IndentSome Nothing head' (parseValue consumer))
 
 parseArrayDocument :: Parser Yaml
 parseArrayDocument = YArray <$> some (L.nonIndented ysc parseArrayDocument')
@@ -115,10 +123,10 @@ parseArrayDocument' = try (L.indentBlock ysc p) <|> parseYArrayValue ysc
   where
     p = do
         _ <- lexeme ysc' $ char '-'
-        return (L.IndentSome Nothing (return . head) (parseValue ysc'))
+        return (L.IndentSome Nothing head' (parseValue ysc'))
 
 parseDocument :: Parser Yaml
-parseDocument = try parseObjectDocument <|> parseArrayDocument
+parseDocument = choice $ map try [parseObjectDocument, parseArrayDocument, parseValue ysc]
 
 parseYaml :: String -> Either ParserError Yaml
 parseYaml = parse (between ysc eof parseDocument) "test"

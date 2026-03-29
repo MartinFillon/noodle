@@ -4,7 +4,8 @@
 module Noodle.Yaml.Parser (parseYaml) where
 
 import Control.Monad (void)
-import Data.Bifunctor (second)
+import Data.Bifunctor (Bifunctor (second))
+import Debug.Trace (trace)
 import Noodle.Parser.Utils (
     Parser,
     ParserError,
@@ -29,6 +30,7 @@ import Text.Megaparsec (
  )
 import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as L
+import Text.Megaparsec.Debug (dbg)
 
 comment :: Parser ()
 comment = L.skipLineComment "#"
@@ -54,48 +56,53 @@ parseYString x =
                 )
 
 parseValue :: Parser () -> Parser Yaml
-parseValue x =
+parseValue consumer =
     choice $
         map
             try
-            [ parseYObject,
-              parseYBoolean x,
-              parseYNumber x,
-              parseYString x
+            [ parseYBoolean consumer,
+              parseYNumber consumer,
+              parseYString consumer
             ]
 
-parseYArrayValue :: Parser Yaml
-parseYArrayValue = do
-    _ <- lexeme ysc $ char '-'
-    parseValue ysc
+parseYArrayValue :: Parser () -> Parser Yaml
+parseYArrayValue consumer = do
+    _ <- lexeme consumer $ char '-'
+    parseValue consumer
 
-parseYArray :: Parser Yaml
-parseYArray =
+parseYArray :: Parser () -> Parser Yaml
+parseYArray consumer =
     YArray
-        <$> some parseYArrayValue
+        <$> some (parseYArrayValue consumer)
 
 parseObjectKey :: Parser String
 parseObjectKey = lexeme ysc $ some (noneOf (":\n\r\t#" :: String))
 
-parseIndentedObjectValue :: String -> Parser (String, Yaml)
-parseIndentedObjectValue key = second YArray <$> parseIndentedObjectValue' key
-
-parseIndentedObjectValue' :: String -> Parser (String, [Yaml])
-parseIndentedObjectValue' key = L.indentBlock ysc' $ do
-    _ <- char ':'
-    return $ L.IndentSome Nothing (return . (key,)) (parseValue ysc')
-
-parseObjectValue :: Parser (String, Yaml)
-parseObjectValue = do
+parseObjectValue :: Parser () -> Parser (String, Yaml)
+parseObjectValue consumer = do
     key <- parseObjectKey
-    _ <- lexeme ysc $ char ':'
-    try ((key,) <$> parseValue ysc) <|> parseIndentedObjectValue key
+    _ <- lexeme consumer $ char ':'
+    (key,) <$> parseValue consumer
 
-parseYObject :: Parser Yaml
-parseYObject = YObject <$> some parseObjectValue
+parseYObject :: Parser () -> Parser Yaml
+parseYObject consumer = YObject <$> some (parseObjectValue consumer)
 
-parseStart :: Parser Yaml
-parseStart = L.nonIndented ysc' (try parseYArray <|> parseValue ysc)
+parseObjectDocument :: Parser Yaml
+parseObjectDocument = YObject <$> some (L.nonIndented ysc parseObjectDocument')
+
+parseObjectDocument' :: Parser (String, Yaml)
+parseObjectDocument' = try (L.indentBlock ysc p) <|> parseObjectValue ysc
+  where
+    p = do
+        key <- parseObjectKey
+        _ <- lexeme ysc' $ char ':'
+        return (L.IndentSome Nothing (return . (\x -> (key, head x))) (parseValue ysc'))
+
+parseArrayDocument :: Parser Yaml
+parseArrayDocument = parseYArray ysc
+
+parseDocument :: Parser Yaml
+parseDocument = parseObjectDocument
 
 parseYaml :: String -> Either ParserError Yaml
-parseYaml = parse (between ysc eof parseStart) "test"
+parseYaml = parse (between ysc eof parseDocument) "test"

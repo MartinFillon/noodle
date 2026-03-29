@@ -2,7 +2,6 @@
 
 module Noodle.Yaml.Parser (parseYaml) where
 
-import Control.Monad (void)
 import Noodle.Parser.Utils (
     Parser,
     ParserError,
@@ -18,16 +17,14 @@ import Text.Megaparsec (
     MonadParsec (eof),
     between,
     choice,
-    empty,
     noneOf,
     parse,
     some,
     try,
     (<|>),
  )
-import Text.Megaparsec.Char (char, space1)
+import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as L
-import Text.Megaparsec.Debug (dbg)
 
 comment :: Parser ()
 comment = L.skipLineComment "#"
@@ -69,8 +66,21 @@ parseYArray =
     YArray
         <$> some parseYArrayValue
 
+parseObjectKey :: Parser String
+parseObjectKey = lexeme ysc $ some (noneOf (":\n\r\t#" :: String))
+
+parseObjectValue :: Parser (String, Yaml)
+parseObjectValue = do
+    key <- parseObjectKey
+    _ <- lexeme ysc $ char ':'
+    value <- parseValue ysc
+    return (key, value)
+
+parseYObject :: Parser Yaml
+parseYObject = YObject <$> some parseObjectValue
+
 parseStart :: Parser Yaml
-parseStart = parseYArray <|> parseValue ysc
+parseStart = try parseYArray <|> try parseYObject <|> parseValue ysc
 
 parseYaml :: String -> Either ParserError Yaml
 parseYaml = parse (between ysc eof parseStart) "test"

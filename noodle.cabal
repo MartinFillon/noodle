@@ -58,6 +58,10 @@ library
 test-suite noodle-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
+  other-modules:
+    DeserializerSpec
+    SerializerSpec
+    Yaml.ParserSpec
   hs-source-dirs: test
   default-language:    Haskell2010
   ghc-options:         -Wall

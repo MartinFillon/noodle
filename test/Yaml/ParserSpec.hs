@@ -30,7 +30,7 @@ tests =
                 )
             ]
         ),
-        ( "huge_sub_object.yaml",
+        ( "huge_subobject.yaml",
           YObject
             [   ( "test",
                   YObject

@@ -34,6 +34,7 @@ packages:
 
 extra-deps:
   - megaparsec-9.7.0
+  - scientific-0.3.8.1
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:

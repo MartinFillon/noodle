@@ -30,11 +30,13 @@ library
     Noodle.Yaml
     Noodle.Yaml.Type
     Noodle.Yaml.Parser
+    Noodle.Yaml.Parser.Numbers
     Noodle.Toml
     Noodle.Toml.Type
   build-depends:       base >= 4.7 && < 5
                       , megaparsec
                       , mtl
+                      , scientific
   default-language:    Haskell2010
   ghc-options:         -Wall
                        -Wcompat

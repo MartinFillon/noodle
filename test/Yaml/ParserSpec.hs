@@ -64,16 +64,47 @@ tests =
         )
     ]
 
+numbersTests :: [(String, Yaml)]
+numbersTests =
+    [ ("integer.yaml", YNumber 12312.0),
+      ("float.yaml", YNumber 312132.67),
+        ( "hexadecimal.yaml",
+          YObject [("lower", YNumber 0xab12), ("upper", YNumber 0xAB12)]
+        ),
+        ( "octal.yaml",
+          YObject
+            [ ("lower", YNumber 0o123),
+              ("upper", YNumber 0O123),
+              ("simple", YNumber 0o123)
+            ]
+        ),
+        ( "scientific.yaml",
+          YObject
+            [ ("lower", YNumber 1.23456e+06),
+              ("upper", YNumber 1.23456E+06)
+            ]
+        )
+    ]
+
 spec :: Spec
 spec = do
     describe "Yaml Parser" $ do
         mapM_
             (\(file, result) -> testYaml ("test/Yaml/files/" ++ file) result)
             tests
+        numbersSpec
+
+numbersSpec :: Spec
+numbersSpec = do
+    describe "Numbers" $
+        do
+            mapM_
+                (\(file, result) -> testYaml ("test/Yaml/files/numbers/" ++ file) result)
+                numbersTests
 
 testYaml :: String -> Yaml -> Spec
 testYaml file result = do
-    it ("should open " ++ file ++ " and parse " ++ show result) $ do
+    it file $ do
         content <- readFile file
         let parsed = parseYaml content
         parsed `shouldBe` Right result

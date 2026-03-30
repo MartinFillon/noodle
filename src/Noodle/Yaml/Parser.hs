@@ -10,10 +10,10 @@ import Noodle.Parser.Utils (
     lexeme,
     parseBool,
     parseEscapedChar,
-    parseNumber,
     parseString,
     sc,
  )
+import Noodle.Yaml.Parser.Numbers (parseYNumber)
 import Noodle.Yaml.Type (Yaml (..))
 import Text.Megaparsec (
     MonadParsec (eof),
@@ -40,9 +40,6 @@ ysc' = L.space (void $ some (char ' ' <|> char '\t')) comment empty
 
 parseYBoolean :: Parser () -> Parser Yaml
 parseYBoolean x = lexeme x $ YBool <$> parseBool x
-
-parseYNumber :: Parser () -> Parser Yaml
-parseYNumber x = lexeme x $ YNumber <$> parseNumber x
 
 parseYString :: Parser () -> Parser Yaml
 parseYString x =

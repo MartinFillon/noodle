@@ -1,0 +1,4 @@
+string: >
+  This is a folded scalar with folded style.
+  It replaces newlines with spaces.
+test: false

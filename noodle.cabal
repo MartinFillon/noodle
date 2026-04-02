@@ -31,6 +31,7 @@ library
     Noodle.Yaml.Type
     Noodle.Yaml.Parser
     Noodle.Yaml.Parser.Numbers
+    Noodle.Yaml.Parser.String
     Noodle.Toml
     Noodle.Toml.Type
   build-depends:       base >= 4.7 && < 5

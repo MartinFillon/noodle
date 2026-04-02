@@ -6,7 +6,6 @@ import Test.Hspec (Spec, describe, it, shouldBe)
 tests :: [(String, Yaml)]
 tests =
     [ ("object.yaml", YObject [("foo", YString "bar"), ("baz", YNumber 3.0)]),
-      ("string.yaml", YString "hello"),
       ("number.yaml", YNumber 3.0),
       ("array.yaml", YArray [YNumber 1.0, YNumber 2.0, YNumber 3.0]),
       ("boolean.yaml", YBool True),
@@ -86,6 +85,36 @@ numbersTests =
         )
     ]
 
+stringsTests :: [(String, Yaml)]
+stringsTests =
+    [   ( "block.yaml",
+          YObject
+            [   ( "string",
+                  YString
+                    "This is a block scalar with literal style.\nIt preserves newlines and spaces."
+                )
+            ]
+        ),
+        ( "collapsed.yaml",
+          YObject
+            [   ( "string",
+                  YString
+                    "This is a folded scalar with folded style. It replaces newlines with spaces."
+                )
+            ]
+        ),
+        ( "complex.yaml",
+          YObject
+            [   ( "string",
+                  YString
+                    "This is a folded scalar with folded style. It replaces newlines with spaces."
+                ),
+              ("test", YBool False)
+            ]
+        ),
+      ("basic.yaml", YString "hello")
+    ]
+
 spec :: Spec
 spec = do
     describe "Yaml Parser" $ do
@@ -93,6 +122,7 @@ spec = do
             (\(file, result) -> testYaml ("test/Yaml/files/" ++ file) result)
             tests
         numbersSpec
+        stringsSpec
 
 numbersSpec :: Spec
 numbersSpec = do
@@ -101,6 +131,14 @@ numbersSpec = do
             mapM_
                 (\(file, result) -> testYaml ("test/Yaml/files/numbers/" ++ file) result)
                 numbersTests
+
+stringsSpec :: Spec
+stringsSpec = do
+    describe "Strings" $
+        do
+            mapM_
+                (\(file, result) -> testYaml ("test/Yaml/files/strings/" ++ file) result)
+                stringsTests
 
 testYaml :: String -> Yaml -> Spec
 testYaml file result = do

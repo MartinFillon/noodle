@@ -9,11 +9,16 @@ import Noodle.Parser.Utils (
     ParserError,
     lexeme,
     parseBool,
-    parseEscapedChar,
-    parseString,
     sc,
  )
 import Noodle.Yaml.Parser.Numbers (parseYNumber)
+import Noodle.Yaml.Parser.String (
+    parseCollapsedIndented,
+    parseStringBlock,
+    parseStringBlockCollapsed,
+    parseStringBlockIndented,
+    parseYString,
+ )
 import Noodle.Yaml.Type (Yaml (..))
 import Text.Megaparsec (
     MonadParsec (eof),
@@ -41,14 +46,6 @@ ysc' = L.space (void $ some (char ' ' <|> char '\t')) comment empty
 parseYBoolean :: Parser () -> Parser Yaml
 parseYBoolean x = lexeme x $ YBool <$> parseBool x
 
-parseYString :: Parser () -> Parser Yaml
-parseYString x =
-    lexeme x $
-        YString
-            <$> ( parseString x
-                    <|> some (try parseEscapedChar <|> noneOf ("\n\t\r#" :: String))
-                )
-
 parseValue :: Parser () -> Parser Yaml
 parseValue consumer =
     choice $
@@ -56,6 +53,8 @@ parseValue consumer =
             try
             [ parseSubObject consumer,
               parseSubArray consumer,
+              parseStringBlock consumer,
+              parseStringBlockCollapsed consumer,
               parseYBoolean consumer,
               parseYNumber consumer,
               parseYString consumer
@@ -84,7 +83,15 @@ parseObjectDocument' = try (L.indentBlock ysc p) <|> parseObjectValue ysc
     p = do
         key <- parseObjectKey
         _ <- lexeme ysc' $ char ':'
-        return (L.IndentSome Nothing (keepFirstItem key) (parseValue ysc'))
+        try (blockStrings key)
+            <|> return (L.IndentSome Nothing (keepFirstItem key) (parseValue ysc'))
+    blockStrings key =
+        choice $
+            map
+                try
+                [ parseStringBlockIndented key ysc',
+                  parseCollapsedIndented key ysc'
+                ]
 
 parseSubObject :: Parser () -> Parser Yaml
 parseSubObject consumer =

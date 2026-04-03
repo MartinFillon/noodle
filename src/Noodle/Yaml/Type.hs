@@ -1,3 +1,5 @@
+{-# LANGUAGE InstanceSigs #-}
+
 module Noodle.Yaml.Type (Yaml (..)) where
 
 import Noodle.Deserializer (Deserializer (..))

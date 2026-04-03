@@ -1,3 +1,5 @@
+{-# LANGUAGE InstanceSigs #-}
+
 module Noodle.Json.Type (Json (..)) where
 
 import Noodle.Serializer (Serializer (..))

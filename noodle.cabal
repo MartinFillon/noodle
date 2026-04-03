@@ -48,15 +48,6 @@ library
                        -Wmissing-home-modules
                        -Wpartial-fields
                        -Wredundant-constraints
-                       -XDeriveGeneric
-                       -XEmptyCase
-                       -XDefaultSignatures
-                       -XTypeOperators
-                       -XOverlappingInstances
-                       -XFlexibleContexts
-                       -XInstanceSigs
-                       -XFlexibleInstances
-                       -XMultiParamTypeClasses
 
 test-suite noodle-test
   type: exitcode-stdio-1.0
@@ -76,15 +67,6 @@ test-suite noodle-test
                        -Wmissing-home-modules
                        -Wpartial-fields
                        -Wredundant-constraints
-                       -XDeriveGeneric
-                       -XEmptyCase
-                       -XDefaultSignatures
-                       -XTypeOperators
-                       -XOverlappingInstances
-                       -XFlexibleContexts
-                       -XInstanceSigs
-                       -XFlexibleInstances
-                       -XMultiParamTypeClasses
   build-depends:
     base >=4.7 && <5
     , noodle

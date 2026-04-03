@@ -1,3 +1,5 @@
+{-# LANGUAGE InstanceSigs #-}
+
 module Noodle.Toml.Type (Toml (..)) where
 
 import Noodle.Deserializer (Deserializer (..))
@@ -48,7 +50,7 @@ instance Deserializer Toml where
 
     getArray :: Toml -> Either String [Toml]
     getArray (TArray x) = Right x
-    getArray _ = Left "Not an number"
+    getArray _ = Left "Not an array"
 
     getString :: Toml -> Either String String
     getString (TString x) = Right x

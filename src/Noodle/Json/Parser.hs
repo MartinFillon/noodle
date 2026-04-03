@@ -76,5 +76,9 @@ parseValue =
               try parseJsonBool
             ]
 
+--- | Parse a JSON string into a 'Json' value. This function uses the 'parse' function from the 'Text.Megaparsec' library to run the parser on the input string.
+--- It expects the entire input to be consumed (using 'eof') and returns either a 'ParserError' if parsing fails or a 'Json' value if parsing succeeds.
+--- >> parseJson "{\"name\": \"Alice\", \"age\": 30, \"isStudent\": false}"
+--- Right (JObject [("name",JString "Alice"),("age",JNumber 30.0),("isStudent",JBool False)])
 parseJson :: String -> Either ParserError Json
 parseJson = parse (between jsc eof parseValue) ""

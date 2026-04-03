@@ -4,6 +4,15 @@ import Data.List (intercalate)
 import Noodle.Json.Parser (parseJson)
 import Noodle.Json.Type (Json (..))
 
+--- | Pretty-print a 'Json' value as a string.
+--- This function formats the JSON value with indentation for better readability.
+--- >> let jsonValue = JObject [("name", JString "Alice"), ("age", JNumber 30), ("isStudent", JBool False)]
+--- >> putStrLn (prettyPrintJson jsonValue)
+--- {
+---   "name": "Alice",
+---   "age": 30,
+---   "isStudent": false
+--- }
 prettyPrintJson :: Json -> String
 prettyPrintJson = prettyPrintJsonWithIndent 0
 

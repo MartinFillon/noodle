@@ -21,11 +21,17 @@ import GHC.Generics (
  )
 import Noodle.Serializer (Serializer (..))
 
+--- | The 'Serialize' type class defines an interface for serializing data structures into a specific format.
+--- This type class is designed to work with any type that has a 'Generic' instance, allowing for automatic serialization of complex data types without requiring manual implementation for each type.
+--- The 'serialize' method takes a value of type 'a' and produces a serialized representation of type 'f', where 'f' is an instance of the 'Serializer' type class.
 class Serializer f => Serialize a f where
+    --- | Serialize a value of type 'a' into a format represented by 'f'.
     serialize :: a -> f
     default serialize :: (Generic a, GSerialize (Rep a) f) => a -> f
     serialize x = gSerialize (from x)
 
+--- | The 'GSerialize' type class is a helper type class used for generic serialization. It defines how to serialize the generic representation of a type.
+--- This type class is used internally by the 'Serialize' type class to provide a default implementation
 class Serializer f => GSerialize a f where
     gSerialize :: a b -> f
 

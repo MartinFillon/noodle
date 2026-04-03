@@ -5,6 +5,9 @@ module Noodle.Yaml.Type (Yaml (..)) where
 import Noodle.Deserializer (Deserializer (..))
 import Noodle.Serializer (Serializer (..))
 
+--- | The 'Yaml' data type represents the various types of values that can be found in a YAML document.
+--- It includes constructors for objects (key-value pairs), strings, numbers, booleans, null values, and arrays.
+--- This type serves as the core representation of YAML data within the library, allowing for easy manipulation and serialization/deserialization of YAML content.
 data Yaml
     = YObject [(String, Yaml)]
     | YString String

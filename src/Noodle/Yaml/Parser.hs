@@ -132,5 +132,9 @@ parseArrayDocument' = try (L.indentBlock ysc p) <|> parseYArrayValue ysc
 parseDocument :: Parser Yaml
 parseDocument = choice $ map try [parseObjectDocument, parseArrayDocument, parseValue ysc]
 
+--- | Parse a YAML string into a 'Yaml' value. This function uses the 'parse' function from the 'Text.Megaparsec' library to run the parser on the input string.
+--- It expects the entire input to be consumed (using 'eof') and returns either a 'ParserError' if parsing fails or a 'Yaml' value if parsing succeeds.
+--- >> parseYaml "name: Alice\nage: 30\nisStudent: false"
+--- Right (YObject [("name",YString "Alice"),("age",YNumber 30.0),("isStudent",YBool False)])
 parseYaml :: String -> Either ParserError Yaml
 parseYaml = parse (between ysc eof parseDocument) "test"

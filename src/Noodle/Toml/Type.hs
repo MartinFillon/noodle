@@ -5,6 +5,9 @@ module Noodle.Toml.Type (Toml (..)) where
 import Noodle.Deserializer (Deserializer (..))
 import Noodle.Serializer (Serializer (..))
 
+--- | The 'Toml' data type represents the various types of values that can be found in a TOML document.
+--- It includes constructors for objects (key-value pairs), strings, numbers, booleans, null values, and arrays.
+--- This type serves as the core representation of TOML data within the library, allowing for easy manipulation and serialization/deserialization of TOML content.
 data Toml
     = TObject [(String, Toml)]
     | TString String

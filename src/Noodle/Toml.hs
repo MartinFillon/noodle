@@ -3,6 +3,14 @@ module Noodle.Toml (Toml (..), prettyPrintToml) where
 import Data.List (intercalate)
 import Noodle.Toml.Type (Toml (..))
 
+--- | Pretty-print a 'Toml' value as a string.
+--- This function formats the TOML value with indentation for better readability.
+--- >> let tomlValue = TObject [("title", TString "TOML Example"), ("owner", TObject [("name", TString "Tom Preston-Werner"), ("dob", TString "1979-05-27T07:32:00Z")])]
+--- >> putStrLn (prettyPrintToml tomlValue)
+--- title = "TOML Example"
+--- [owner]
+--- name = "Tom Preston-Werner"
+--- dob = "1979-05-27T07:32:00Z"
 prettyPrintToml :: Toml -> String
 prettyPrintToml = prettyPrintTomlWithPath []
 

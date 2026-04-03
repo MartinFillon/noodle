@@ -1,16 +1,17 @@
+name: pipeline
 on:
-  # pull_request:
-  #   branches: [master]
-  # push:
-  #   branches: [master]
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
   workflow_dispatch:
 
 jobs:
-  build:
+  run-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: test and build
+      - name: test
         uses: freckle/stack-action@v5

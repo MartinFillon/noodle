@@ -28,7 +28,6 @@ import Noodle.Deserializer (
 --- This type class is designed to work with any type that has a 'Generic' instance, allowing for automatic deserialization of complex data types without requiring manual implementation for each type.
 --- The 'deserialize' method takes a value of type 'f' and produces either an error message (Left String) or a successfully deserialized value of type 'a' (Right a), where 'f' is an instance of the 'Deserializer' type class.
 class Deserializer f => Deserialize a f where
-
     --- | Deserialize a value of type 'a' from a format represented by 'f'.
     deserialize :: f -> Either String a
     default deserialize ::

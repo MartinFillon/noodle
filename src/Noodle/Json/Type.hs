@@ -2,8 +2,8 @@
 
 module Noodle.Json.Type (Json (..)) where
 
-import Noodle.Serializer (Serializer (..))
 import Noodle.Deserializer (Deserializer (..))
+import Noodle.Serializer (Serializer (..))
 
 --- | The 'Json' data type represents the various types of values that can be found in a JSON document.
 --- It includes constructors for objects (key-value pairs), strings, numbers, booleans, null values, and arrays.

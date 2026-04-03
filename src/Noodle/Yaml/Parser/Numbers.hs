@@ -27,14 +27,14 @@ parseHexadecimal =
     YNumber . fromIntegral
         <$> ( L.hexadecimal :: Parser Integer
             )
-            <?> "Hexadecimal Number"
+        <?> "Hexadecimal Number"
 
 parseOctal :: Parser Yaml
 parseOctal =
     YNumber . fromIntegral
         <$> ( L.octal :: Parser Integer
             )
-            <?> "Octal Number"
+        <?> "Octal Number"
 
 baseMap :: [(String, Parser Yaml)]
 baseMap =

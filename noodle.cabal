@@ -5,11 +5,11 @@ version:             0.1.0.0
 -- synopsis:
 -- description:
 homepage:            https://github.com/MartinFillon/noodle#readme
-license:             BSD-3-Clause
+license:             MIT
 license-file:        LICENSE
 author:              Martin Fillon
 maintainer:          martin.fillon@hotmail.com
-copyright:           2025 Martin Fillon
+copyright:           2025-2026 Martin Fillon
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md

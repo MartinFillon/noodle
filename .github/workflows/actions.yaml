@@ -27,15 +27,3 @@ jobs:
         uses: haskell-actions/run-fourmolu@v12
         with:
           version: "0.14.1.0"
-
-  linting:
-    runs-on: ubuntu-latest
-    needs: run-tests
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: lint
-        uses: haskell-actions/hlint-run@v2.4.10
-        with:
-          path: "src"

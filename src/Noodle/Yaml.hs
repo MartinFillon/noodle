@@ -4,6 +4,13 @@ import Data.List (intercalate)
 import Noodle.Yaml.Parser (parseYaml)
 import Noodle.Yaml.Type (Yaml (..))
 
+--- | Pretty-print a 'Yaml' value as a string.
+--- This function formats the YAML value with indentation for better readability.
+--- >> let yamlValue = YObject [("name", YString "Alice"), ("age", YNumber 30), ("isStudent", YBool False)]
+--- >> putStrLn (prettyPrintYaml yamlValue)
+--- name: "Alice"
+--- age: 30
+--- isStudent: false
 prettyPrintYaml :: Yaml -> String
 prettyPrintYaml = prettyPrintYamlWithIndent 0
 

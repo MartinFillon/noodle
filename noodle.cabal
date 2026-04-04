@@ -1,9 +1,9 @@
 cabal-version:       2.2
 
 name:                noodle
-version:             0.1.0.0
--- synopsis:
--- description:
+version:             0.1.0
+synopsis:            Noodle is a Haskell library for parsing and serializing data. It provides a simple and efficient way to work with these popular data formats in Haskell applications.
+description:         Noodle is a Haskell library for parsing and serializing data. It provides a simple and efficient way to work with these popular data formats in Haskell applications. Noodle supports JSON, YAML, and TOML, making it a versatile choice for developers who need to handle various data formats in their projects. With its intuitive API and robust parsing capabilities, Noodle is designed to make it easy for developers to work with data in Haskell.
 homepage:            https://github.com/MartinFillon/noodle#readme
 license:             MIT
 license-file:        LICENSE

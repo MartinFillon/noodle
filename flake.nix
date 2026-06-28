@@ -13,14 +13,26 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+
+        hPkgs = pkgs.haskell.packages.ghc910;
+
+        defaultPackages = [
+          hPkgs.stack
+          hPkgs.ghc
+        ];
       in
       {
         devShells.default = pkgs.mkShell {
-          packages = with pkgs; [
-            stack
-            ghc
-          ];
+          packages =
+            defaultPackages
+            ++ (with pkgs; [
+              cabal2nix
+            ]);
+
+          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath defaultPackages;
         };
+
+        packages.default = hPkgs.callCabal2nix "noodle" ./. { };
       }
     );
 }

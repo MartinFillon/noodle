@@ -7,8 +7,16 @@
 
 module DeserializerSpec (spec) where
 
+import Prelude hiding (null)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
+import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Map as Map
+import qualified Data.Sequence as Seq
+import qualified Data.Set as Set
+import qualified Data.Text as T
+import Data.Scientific (Scientific)
+import Numeric.Natural (Natural)
 import GHC.Generics (Generic)
 import Noodle (Deserialize (..), Deserializer (..))
 import Noodle.Json (Json (..))
@@ -39,10 +47,17 @@ data T3 = T3
 
 data T4 = T41 Int | T42 Bool deriving (Generic, Eq, Show)
 
+data OptionalRecord = OptionalRecord
+    { optReq :: Int,
+      optField :: Maybe String
+    }
+    deriving (Generic, Eq, Show)
+
 instance Deserializer f => Deserialize T1 f
 instance Deserializer f => Deserialize T2 f
 instance Deserializer f => Deserialize T3 f
 instance Deserializer f => Deserialize T4 f
+instance Deserializer f => Deserialize OptionalRecord f
 
 class (Serializer f, Deserializer f, Eq f, Show f) => TestDeserializer f
 
@@ -83,3 +98,53 @@ testDeserializer = do
     it "should deserialize an object with multiple constructors" $ do
         deserialize (number @f 12) `shouldBe` Right (T41 12)
         deserialize (bool @f True) `shouldBe` Right (T42 True)
+    it "should deserialize a float" $
+        deserialize (number @f 1.5) `shouldBe` Right (1.5 :: Float)
+    it "should deserialize a char" $
+        deserialize (string @f "a") `shouldBe` Right 'a'
+    it "should deserialize ()" $
+        deserialize (null @f) `shouldBe` Right ()
+    it "should deserialize Text" $
+        deserialize (string @f "hello text") `shouldBe` Right (T.pack "hello text")
+    it "should deserialize Natural" $
+        deserialize (number @f 42) `shouldBe` Right (42 :: Natural)
+    it "should deserialize Scientific" $
+        deserialize (number @f 12.34) `shouldBe` Right (read "12.34" :: Scientific)
+    it "should deserialize NonEmpty" $
+        deserialize (array @f [number @f 1, number @f 2, number @f 3])
+            `shouldBe` Right (1 :| [2, 3] :: NonEmpty Int)
+    it "should deserialize Map String Int" $
+        deserialize (object @f [("key", number @f 100)])
+            `shouldBe` Right (Map.fromList [("key", 100 :: Int)])
+    it "should deserialize Map Text Int" $
+        deserialize (object @f [("key", number @f 100)])
+            `shouldBe` Right (Map.fromList [(T.pack "key", 100 :: Int)])
+    it "should deserialize Set Int" $
+        deserialize (array @f [number @f 1, number @f 2])
+            `shouldBe` Right (Set.fromList [1 :: Int, 2])
+    it "should deserialize Seq Int" $
+        deserialize (array @f [number @f 1, number @f 2])
+            `shouldBe` Right (Seq.fromList [1 :: Int, 2])
+    it "should deserialize a 2-tuple" $
+        deserialize (array @f [number @f 1, string @f "hello"])
+            `shouldBe` Right (1 :: Int, "hello")
+    it "should deserialize a 3-tuple" $
+        deserialize (array @f [number @f 1, bool @f True, string @f "hello"])
+            `shouldBe` Right (1 :: Int, True, "hello")
+    it "should deserialize Maybe (Just)" $
+        deserialize (number @f 42) `shouldBe` Right (Just (42 :: Int))
+    it "should deserialize Maybe (Nothing from null)" $
+        deserialize (null @f) `shouldBe` Right (Nothing :: Maybe Int)
+    it "should deserialize Either (Left)" $
+        deserialize (number @f 42) `shouldBe` Right (Left (42 :: Int) :: Either Int String)
+    it "should deserialize Either (Right)" $
+        deserialize (string @f "ok") `shouldBe` Right (Right "ok" :: Either Int String)
+    it "should deserialize record with Maybe field present" $
+        deserialize (object @f [("optReq", number @f 10), ("optField", string @f "val")])
+            `shouldBe` Right (OptionalRecord 10 (Just "val"))
+    it "should deserialize record with Maybe field null" $
+        deserialize (object @f [("optReq", number @f 10), ("optField", null @f)])
+            `shouldBe` Right (OptionalRecord 10 Nothing)
+    it "should deserialize record with Maybe field omitted" $
+        deserialize (object @f [("optReq", number @f 10)])
+            `shouldBe` Right (OptionalRecord 10 Nothing)

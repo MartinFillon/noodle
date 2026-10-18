@@ -36,7 +36,7 @@ instance Serializer Json where
     merge :: Json -> Json -> Json
     merge (JObject x) (JObject y) = JObject (x ++ y)
     merge (JArray x) (JArray y) = JArray (x ++ y)
-    merge (JArray x) y = JArray (y : x)
+    merge (JArray x) y = JArray (x ++ [y])
     merge x y = JArray [x, y]
 
     null :: Json
@@ -53,7 +53,7 @@ instance Deserializer Json where
 
     getArray :: Json -> Either String [Json]
     getArray (JArray x) = Right x
-    getArray _ = Left "Not an number"
+    getArray _ = Left "Not an array"
 
     getString :: Json -> Either String String
     getString (JString x) = Right x

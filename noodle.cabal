@@ -35,9 +35,11 @@ library
     Noodle.Toml
     Noodle.Toml.Type
   build-depends:       base >= 4.7 && < 5
+                      , containers
                       , megaparsec
                       , mtl
                       , scientific
+                      , text
   default-language:    Haskell2010
   ghc-options:         -Wall
                        -Wcompat
@@ -54,6 +56,8 @@ test-suite noodle-test
   main-is: Spec.hs
   other-modules:
     DeserializerSpec
+    Json.ParserSpec
+    PrettyPrintSpec
     SerializerSpec
     Yaml.ParserSpec
   hs-source-dirs: test
@@ -69,8 +73,11 @@ test-suite noodle-test
                        -Wredundant-constraints
   build-depends:
     base >=4.7 && <5
+    , containers
     , noodle
     , hspec
+    , scientific
+    , text
 
 source-repository head
   type:     git

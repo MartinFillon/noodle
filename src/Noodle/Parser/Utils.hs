@@ -56,19 +56,19 @@ parseString sc' =
         between
             (char '\"')
             (char '\"')
-            ( (:)
-                <$> (try parseEscapedChar <|> noneOf ("\"" :: [Char]))
-                <*> many (try parseEscapedChar <|> noneOf ("\"" :: [Char]))
-            )
+            (many (try parseEscapedChar <|> noneOf ("\"" :: [Char])))
 
 parseEscapedChar :: Parser Char
 parseEscapedChar =
     choice
         [ try (string "\\\"" >> return '\"'),
+          try (string "\\\\" >> return '\\'),
+          try (string "\\/" >> return '/'),
+          try (string "\\b" >> return '\b'),
+          try (string "\\f" >> return '\f'),
           try (string "\\n" >> return '\n'),
           try (string "\\r" >> return '\r'),
-          try (string "\\t" >> return '\t'),
-          try (string "\\\\" >> return '\\')
+          try (string "\\t" >> return '\t')
         ]
 
 parseTrue :: Parser () -> Parser Bool

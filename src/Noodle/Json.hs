@@ -34,5 +34,5 @@ prettyPrintJsonWithIndent indent (JArray xs) = "[\n" ++ intercalate ",\n" entrie
 prettyPrintJsonWithIndent _ (JString s) = show s
 prettyPrintJsonWithIndent _ (JNumber n) = show n
 prettyPrintJsonWithIndent _ (JBool True) = "true"
-prettyPrintJsonWithIndent _ (JBool False) = "true"
+prettyPrintJsonWithIndent _ (JBool False) = "false"
 prettyPrintJsonWithIndent _ JNull = "null"

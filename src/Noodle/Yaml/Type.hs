@@ -53,7 +53,7 @@ instance Deserializer Yaml where
 
     getArray :: Yaml -> Either String [Yaml]
     getArray (YArray x) = Right x
-    getArray _ = Left "Not an number"
+    getArray _ = Left "Not an array"
 
     getString :: Yaml -> Either String String
     getString (YString x) = Right x

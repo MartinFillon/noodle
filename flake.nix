@@ -79,7 +79,6 @@
             hPkgs.haskell-language-server
             pkgs.fourmolu
             pkgs.hlint
-            hPkgs.stack
           ];
         };
 

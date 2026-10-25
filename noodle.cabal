@@ -23,7 +23,6 @@ library
     Noodle.Serializer
     Noodle.Deserialize
     Noodle.Deserializer
-    Noodle.Parser.Utils
     Noodle.Json
     Noodle.Json.Type
     Noodle.Json.Parser
@@ -40,6 +39,8 @@ library
     Noodle.Yaml.Parser.Flow
     Noodle.Yaml.Parser.Alias
     Noodle.Yaml.Parser.Anchor
+    Noodle.Yaml.Parser.Items
+    Noodle.Parser.Utils
   build-depends:       base >= 4.7 && < 5
                       , containers
                       , megaparsec

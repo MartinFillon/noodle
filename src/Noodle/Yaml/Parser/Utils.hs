@@ -60,3 +60,4 @@ mergePairs (("<<", YArray objs) : rest) = concatMap extractFields objs ++ mergeP
     extractFields (YObject fs) = fs
     extractFields _ = []
 mergePairs (kv : rest) = kv : mergePairs rest
+

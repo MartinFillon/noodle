@@ -1,4 +1,4 @@
-module Noodle.Yaml.Parser.Flow (parseFlowSequence) where
+module Noodle.Yaml.Parser.Flow (parseFlowSequence, parseFlowMapping) where
 
 import Control.Applicative (some, (<|>))
 import Control.Monad.State (lift)

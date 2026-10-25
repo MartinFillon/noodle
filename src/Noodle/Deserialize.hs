@@ -95,7 +95,11 @@ instance {-# OVERLAPPING #-} (Deserializer a, Deserialize c a) => GDeserializeRe
             Right () -> Right (K1 Nothing)
             Left _ -> K1 . Just <$> deserialize v
 
-instance {-# OVERLAPPABLE #-} (Deserializer a, Selector s, GDeserialize f a, GDeserializeRecordField f a) => GDeserialize (M1 S s f) a where
+instance
+    {-# OVERLAPPABLE #-}
+    (Deserializer a, Selector s, GDeserialize f a, GDeserializeRecordField f a) =>
+    GDeserialize (M1 S s f) a
+    where
     gDeserialize ::
         a ->
         Either String (M1 S s f b)
@@ -123,9 +127,10 @@ instance {-# OVERLAPPABLE #-} Deserializer f => Deserialize Bool f where
 
 instance {-# OVERLAPPABLE #-} Deserializer f => Deserialize Char f where
     deserialize :: f -> Either String Char
-    deserialize x = getString x >>= \case
-        [c] -> Right c
-        _ -> Left "Expected single-character string for Char"
+    deserialize x =
+        getString x >>= \case
+            [c] -> Right c
+            _ -> Left "Expected single-character string for Char"
 
 instance {-# OVERLAPPABLE #-} Deserializer f => Deserialize () f where
     deserialize :: f -> Either String ()
@@ -203,36 +208,58 @@ instance {-# OVERLAPPABLE #-} (Deserializer f, Deserialize a f) => Deserialize (
 
 instance {-# OVERLAPPABLE #-} (Deserializer f, Deserialize a f, Deserialize b f) => Deserialize (a, b) f where
     deserialize :: f -> Either String (a, b)
-    deserialize x = getArray x >>= \case
-        [a, b] -> (,) <$> deserialize a <*> deserialize b
-        _ -> Left "Expected 2-element array for tuple (a, b)"
+    deserialize x =
+        getArray x >>= \case
+            [a, b] -> (,) <$> deserialize a <*> deserialize b
+            _ -> Left "Expected 2-element array for tuple (a, b)"
 
 instance
     {-# OVERLAPPABLE #-}
     (Deserializer f, Deserialize a f, Deserialize b f, Deserialize c f) =>
     Deserialize (a, b, c) f
-  where
+    where
     deserialize :: f -> Either String (a, b, c)
-    deserialize x = getArray x >>= \case
-        [a, b, c] -> (,,) <$> deserialize a <*> deserialize b <*> deserialize c
-        _ -> Left "Expected 3-element array for tuple (a, b, c)"
+    deserialize x =
+        getArray x >>= \case
+            [a, b, c] -> (,,) <$> deserialize a <*> deserialize b <*> deserialize c
+            _ -> Left "Expected 3-element array for tuple (a, b, c)"
 
 instance
     {-# OVERLAPPABLE #-}
-    (Deserializer f, Deserialize a f, Deserialize b f, Deserialize c f, Deserialize d f) =>
+    ( Deserializer f,
+      Deserialize a f,
+      Deserialize b f,
+      Deserialize c f,
+      Deserialize d f
+    ) =>
     Deserialize (a, b, c, d) f
-  where
+    where
     deserialize :: f -> Either String (a, b, c, d)
-    deserialize x = getArray x >>= \case
-        [a, b, c, d] -> (,,,) <$> deserialize a <*> deserialize b <*> deserialize c <*> deserialize d
-        _ -> Left "Expected 4-element array for tuple (a, b, c, d)"
+    deserialize x =
+        getArray x >>= \case
+            [a, b, c, d] ->
+                (,,,) <$> deserialize a <*> deserialize b <*> deserialize c <*> deserialize d
+            _ -> Left "Expected 4-element array for tuple (a, b, c, d)"
 
 instance
     {-# OVERLAPPABLE #-}
-    (Deserializer f, Deserialize a f, Deserialize b f, Deserialize c f, Deserialize d f, Deserialize e f) =>
+    ( Deserializer f,
+      Deserialize a f,
+      Deserialize b f,
+      Deserialize c f,
+      Deserialize d f,
+      Deserialize e f
+    ) =>
     Deserialize (a, b, c, d, e) f
-  where
+    where
     deserialize :: f -> Either String (a, b, c, d, e)
-    deserialize x = getArray x >>= \case
-        [a, b, c, d, e] -> (,,,,) <$> deserialize a <*> deserialize b <*> deserialize c <*> deserialize d <*> deserialize e
-        _ -> Left "Expected 5-element array for tuple (a, b, c, d, e)"
+    deserialize x =
+        getArray x >>= \case
+            [a, b, c, d, e] ->
+                (,,,,)
+                    <$> deserialize a
+                    <*> deserialize b
+                    <*> deserialize c
+                    <*> deserialize d
+                    <*> deserialize e
+            _ -> Left "Expected 5-element array for tuple (a, b, c, d, e)"

@@ -20,18 +20,21 @@ spec = describe "Pretty Printing" $ do
             prettyPrintJson (JString "") `shouldBe` "\"\""
 
         it "formats string with escapes correctly" $
-            prettyPrintJson (JString "hello\n\"world\"") `shouldBe` "\"hello\\n\\\"world\\\"\""
+            prettyPrintJson (JString "hello\n\"world\"")
+                `shouldBe` "\"hello\\n\\\"world\\\"\""
 
         it "formats array of booleans" $
-            prettyPrintJson (JArray [JBool True, JBool False]) `shouldBe` "[\n  true,\n  false\n]"
+            prettyPrintJson (JArray [JBool True, JBool False])
+                `shouldBe` "[\n  true,\n  false\n]"
 
         it "roundtrips with parser" $ do
-            let sample = JObject
-                    [ ("name", JString "Alice")
-                    , ("active", JBool False)
-                    , ("score", JNumber 100.0)
-                    , ("items", JArray [JNumber 1.0, JNumber 2.0])
-                    ]
+            let sample =
+                    JObject
+                        [ ("name", JString "Alice"),
+                          ("active", JBool False),
+                          ("score", JNumber 100.0),
+                          ("items", JArray [JNumber 1.0, JNumber 2.0])
+                        ]
             parseJson (prettyPrintJson sample) `shouldBe` Right sample
 
     describe "Yaml Pretty Printing" $ do
@@ -48,9 +51,10 @@ spec = describe "Pretty Printing" $ do
             prettyPrintYaml (YObject [("key", YString "value")]) `shouldBe` "key: \"value\""
 
         it "roundtrips with parser" $ do
-            let sample = YObject
-                    [ ("name", YString "Bob")
-                    , ("active", YBool False)
-                    , ("score", YNumber 42.0)
-                    ]
+            let sample =
+                    YObject
+                        [ ("name", YString "Bob"),
+                          ("active", YBool False),
+                          ("score", YNumber 42.0)
+                        ]
             parseYaml (prettyPrintYaml sample) `shouldBe` Right sample

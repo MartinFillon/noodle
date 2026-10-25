@@ -1,17 +1,28 @@
-module Noodle.Yaml.Parser.Utils (skipHSpace, skipHSpace1, skipComment, skipLineEnd, skipBlankLines, flowSpace, isSpaceOrNewline, resolvePlainScalar, trim, mergePairs) where
+module Noodle.Yaml.Parser.Utils (
+    skipHSpace,
+    skipHSpace1,
+    skipComment,
+    skipLineEnd,
+    skipBlankLines,
+    flowSpace,
+    isSpaceOrNewline,
+    resolvePlainScalar,
+    trim,
+    mergePairs,
+) where
 
 import Control.Monad (void)
 import Data.Char (isSpace)
 import Noodle.Yaml.Parser.Numbers (parsePlainNumber)
 import Noodle.Yaml.Parser.Type (YamlParser)
 import Noodle.Yaml.Type (Yaml (..))
-import Text.Megaparsec
-  ( MonadParsec (eof, takeWhile1P, takeWhileP, try),
+import Text.Megaparsec (
+    MonadParsec (eof, takeWhile1P, takeWhileP, try),
     many,
     optional,
     satisfy,
     (<|>),
-  )
+ )
 import Text.Megaparsec.Char (char, eol)
 
 --- | Consume horizontal spaces (spaces and tabs)
@@ -35,7 +46,14 @@ skipBlankLines = void $ many (try (skipHSpace *> optional skipComment *> eol))
 
 --- | Whitespace parser in flow context (skips spaces, tabs, newlines, and comments)
 flowSpace :: YamlParser ()
-flowSpace = void $ many (try (void (satisfy (\c -> c == ' ' || c == '\t' || c == '\n' || c == '\r')) <|> skipComment))
+flowSpace =
+    void $
+        many
+            ( try
+                ( void (satisfy (\c -> c == ' ' || c == '\t' || c == '\n' || c == '\r'))
+                    <|> skipComment
+                )
+            )
 
 isSpaceOrNewline :: Char -> Bool
 isSpaceOrNewline c = isSpace c || c `elem` ("\n\r" :: String)
@@ -43,11 +61,11 @@ isSpaceOrNewline c = isSpace c || c `elem` ("\n\r" :: String)
 --- | Resolve an unquoted scalar string according to YAML 1.2 Core Schema
 resolvePlainScalar :: String -> Yaml
 resolvePlainScalar s
-  | s `elem` ["~", "null", "Null", "NULL"] = YNull
-  | s `elem` ["true", "True", "TRUE"] = YBool True
-  | s `elem` ["false", "False", "FALSE"] = YBool False
-  | Just n <- parsePlainNumber s = YNumber n
-  | otherwise = YString s
+    | s `elem` ["~", "null", "Null", "NULL"] = YNull
+    | s `elem` ["true", "True", "TRUE"] = YBool True
+    | s `elem` ["false", "False", "FALSE"] = YBool False
+    | Just n <- parsePlainNumber s = YNumber n
+    | otherwise = YString s
 
 trim :: String -> String
 trim = f . f where f = reverse . dropWhile isSpace
@@ -60,4 +78,3 @@ mergePairs (("<<", YArray objs) : rest) = concatMap extractFields objs ++ mergeP
     extractFields (YObject fs) = fs
     extractFields _ = []
 mergePairs (kv : rest) = kv : mergePairs rest
-

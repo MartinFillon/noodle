@@ -23,7 +23,7 @@ prettyPrintJsonWithIndent indent (JObject kvs) = "{\n" ++ intercalate ",\n" entr
     nextIndent = indent + 2
     entries =
         [ indentStr ++ "  " ++ show k ++ ": " ++ prettyPrintJsonWithIndent nextIndent v
-          | (k, v) <- kvs
+        | (k, v) <- kvs
         ]
 prettyPrintJsonWithIndent indent (JArray xs) = "[\n" ++ intercalate ",\n" entries ++ "\n" ++ indentStr ++ "]"
   where

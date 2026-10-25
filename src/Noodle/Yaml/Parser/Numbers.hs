@@ -19,11 +19,22 @@ import qualified Text.Megaparsec.Char.Lexer as L
 
 --- | Parse special float values: NaN, +inf, -inf
 parseSpecialFloat :: Parser Double
-parseSpecialFloat = choice
-    [ try (choice [string ".nan", string ".NaN", string ".NAN"] *> return (0 / 0))
-    , try (choice [string ".inf", string ".Inf", string ".INF", string "+.inf", string "+.Inf", string "+.INF"] *> return (1 / 0))
-    , try (choice [string "-.inf", string "-.Inf", string "-.INF"] *> return (-1 / 0))
-    ]
+parseSpecialFloat =
+    choice
+        [ try (choice [string ".nan", string ".NaN", string ".NAN"] *> return (0 / 0)),
+          try
+            ( choice
+                [ string ".inf",
+                  string ".Inf",
+                  string ".INF",
+                  string "+.inf",
+                  string "+.Inf",
+                  string "+.INF"
+                ]
+                *> return (1 / 0)
+            ),
+          try (choice [string "-.inf", string "-.Inf", string "-.INF"] *> return (-1 / 0))
+        ]
 
 --- | Parse hexadecimal integers (with optional sign)
 parseHexNum :: Parser Double
@@ -47,7 +58,9 @@ parsePlainNumber str =
     runParser' (parseSpecialFloat <* eof)
         <|> runParser' (parseHexNum <* eof)
         <|> runParser' (parseOctNum <* eof)
-        <|> (toRealFloat <$> runParser' ((L.signed (return ()) L.scientific :: Parser Scientific) <* eof))
+        <|> ( toRealFloat
+                <$> runParser' ((L.signed (return ()) L.scientific :: Parser Scientific) <* eof)
+            )
   where
     runParser' p = case runParser p "" str of
         Right val -> Just val
@@ -62,11 +75,11 @@ parseOctal = YNumber <$> parseOctNum <?> "Octal Number"
 
 baseMap :: [(String, Parser Yaml)]
 baseMap =
-    [ ("0x", parseHexadecimal)
-    , ("0X", parseHexadecimal)
-    , ("0o", parseOctal)
-    , ("0O", parseOctal)
-    , ("0", parseOctal)
+    [ ("0x", parseHexadecimal),
+      ("0X", parseHexadecimal),
+      ("0o", parseOctal),
+      ("0O", parseOctal),
+      ("0", parseOctal)
     ]
 
 parseNumberBase :: Parser () -> Parser Yaml
@@ -84,7 +97,9 @@ parseNaN x =
 
 parseScientific :: Parser () -> Parser Yaml
 parseScientific x =
-    lexeme x (YNumber . toRealFloat <$> (L.signed x L.scientific :: Parser Scientific))
+    lexeme
+        x
+        (YNumber . toRealFloat <$> (L.signed x L.scientific :: Parser Scientific))
         <?> "Scientific Notation"
 
 parseYNumber' :: Parser () -> Parser Yaml
@@ -95,9 +110,9 @@ parseYNumber x =
     choice $
         map
             try
-            [ parseNaN x
-            , parseInfinity x
-            , parseNumberBase x
-            , parseScientific x
-            , parseYNumber' x
+            [ parseNaN x,
+              parseInfinity x,
+              parseNumberBase x,
+              parseScientific x,
+              parseYNumber' x
             ]

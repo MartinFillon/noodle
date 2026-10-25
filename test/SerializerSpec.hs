@@ -7,22 +7,22 @@
 
 module SerializerSpec (spec) where
 
-import Prelude hiding (null)
 import Test.Hspec (Spec, describe, it, shouldBe)
+import Prelude hiding (null)
 
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map as Map
+import Data.Scientific (Scientific)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Text as T
-import Data.Scientific (Scientific)
-import Numeric.Natural (Natural)
 import GHC.Generics (Generic)
 import Noodle.Json (Json (..))
 import Noodle.Serialize (Serialize (serialize))
 import Noodle.Serializer (Serializer (..))
 import Noodle.Toml (Toml (..))
 import Noodle.Yaml (Yaml (..))
+import Numeric.Natural (Natural)
 
 spec :: Spec
 spec = do

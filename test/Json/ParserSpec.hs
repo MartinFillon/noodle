@@ -1,8 +1,8 @@
 module Json.ParserSpec (spec) where
 
+import Data.Either (isLeft)
 import Noodle.Json (Json (..), parseJson)
 import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
-import Data.Either (isLeft)
 
 spec :: Spec
 spec = describe "Json Parser" $ do
@@ -53,7 +53,8 @@ spec = describe "Json Parser" $ do
             parseJson "\"\\t\"" `shouldBe` Right (JString "\t")
 
         it "parses combined escape sequence" $
-            parseJson "\"line1\\nline2\\ttabbed\"" `shouldBe` Right (JString "line1\nline2\ttabbed")
+            parseJson "\"line1\\nline2\\ttabbed\""
+                `shouldBe` Right (JString "line1\nline2\ttabbed")
 
     describe "Arrays" $ do
         it "parses empty array" $
@@ -68,7 +69,8 @@ spec = describe "Json Parser" $ do
 
         it "parses nested arrays" $
             parseJson "[[1, 2], [3, 4]]"
-                `shouldBe` Right (JArray [JArray [JNumber 1.0, JNumber 2.0], JArray [JNumber 3.0, JNumber 4.0]])
+                `shouldBe` Right
+                    (JArray [JArray [JNumber 1.0, JNumber 2.0], JArray [JNumber 3.0, JNumber 4.0]])
 
         it "handles whitespace inside array" $
             parseJson "[  1 ,   2 ,  3  ]"

@@ -7,22 +7,22 @@
 
 module DeserializerSpec (spec) where
 
-import Prelude hiding (null)
 import Test.Hspec (Spec, describe, it, shouldBe)
+import Prelude hiding (null)
 
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map as Map
+import Data.Scientific (Scientific)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Text as T
-import Data.Scientific (Scientific)
-import Numeric.Natural (Natural)
 import GHC.Generics (Generic)
 import Noodle (Deserialize (..), Deserializer (..))
 import Noodle.Json (Json (..))
 import Noodle.Serializer (Serializer (..))
 import Noodle.Toml (Toml (..))
 import Noodle.Yaml (Yaml (..))
+import Numeric.Natural (Natural)
 
 spec :: Spec
 spec = do
@@ -136,11 +136,13 @@ testDeserializer = do
     it "should deserialize Maybe (Nothing from null)" $
         deserialize (null @f) `shouldBe` Right (Nothing :: Maybe Int)
     it "should deserialize Either (Left)" $
-        deserialize (number @f 42) `shouldBe` Right (Left (42 :: Int) :: Either Int String)
+        deserialize (number @f 42)
+            `shouldBe` Right (Left (42 :: Int) :: Either Int String)
     it "should deserialize Either (Right)" $
         deserialize (string @f "ok") `shouldBe` Right (Right "ok" :: Either Int String)
     it "should deserialize record with Maybe field present" $
-        deserialize (object @f [("optReq", number @f 10), ("optField", string @f "val")])
+        deserialize
+            (object @f [("optReq", number @f 10), ("optField", string @f "val")])
             `shouldBe` Right (OptionalRecord 10 (Just "val"))
     it "should deserialize record with Maybe field null" $
         deserialize (object @f [("optReq", number @f 10), ("optField", null @f)])

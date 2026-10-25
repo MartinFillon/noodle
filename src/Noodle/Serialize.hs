@@ -162,7 +162,7 @@ instance
     {-# OVERLAPPABLE #-}
     (Serializer f, Serialize a f, Serialize b f, Serialize c f) =>
     Serialize (a, b, c) f
-  where
+    where
     serialize :: (a, b, c) -> f
     serialize (a, b, c) = array [serialize a, serialize b, serialize c]
 
@@ -170,14 +170,20 @@ instance
     {-# OVERLAPPABLE #-}
     (Serializer f, Serialize a f, Serialize b f, Serialize c f, Serialize d f) =>
     Serialize (a, b, c, d) f
-  where
+    where
     serialize :: (a, b, c, d) -> f
     serialize (a, b, c, d) = array [serialize a, serialize b, serialize c, serialize d]
 
 instance
     {-# OVERLAPPABLE #-}
-    (Serializer f, Serialize a f, Serialize b f, Serialize c f, Serialize d f, Serialize e f) =>
+    ( Serializer f,
+      Serialize a f,
+      Serialize b f,
+      Serialize c f,
+      Serialize d f,
+      Serialize e f
+    ) =>
     Serialize (a, b, c, d, e) f
-  where
+    where
     serialize :: (a, b, c, d, e) -> f
     serialize (a, b, c, d, e) = array [serialize a, serialize b, serialize c, serialize d, serialize e]

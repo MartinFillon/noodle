@@ -10,6 +10,14 @@ import Text.Megaparsec.Char (char)
 
 parseAlias :: YamlParser Yaml
 parseAlias =
-  (char '*' *> takeWhile1P (Just "alias name") (\c -> not (isSpace c || c `elem` (",[]{}:" :: String)))) >>= \name ->
-    get >>= \anchors ->
-      maybe (fail $ "Undefined YAML alias: *" ++ name) return (Map.lookup name anchors)
+    ( char '*'
+        *> takeWhile1P
+            (Just "alias name")
+            (\c -> not (isSpace c || c `elem` (",[]{}:" :: String)))
+    )
+        >>= \name ->
+            get >>= \anchors ->
+                maybe
+                    (fail $ "Undefined YAML alias: *" ++ name)
+                    return
+                    (Map.lookup name anchors)

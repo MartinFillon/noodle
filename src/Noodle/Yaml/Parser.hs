@@ -8,8 +8,8 @@ import Noodle.Yaml.Parser.Items (parseIndentedBlock)
 import Noodle.Yaml.Parser.Type (YamlParser)
 import Noodle.Yaml.Parser.Utils (skipBlankLines, skipLineEnd)
 import Noodle.Yaml.Type (Yaml (..))
-import Text.Megaparsec
-  ( choice,
+import Text.Megaparsec (
+    choice,
     eof,
     lookAhead,
     many,
@@ -17,22 +17,26 @@ import Text.Megaparsec
     parse,
     takeWhileP,
     try,
-  )
+ )
 import Text.Megaparsec.Char (char, eol, string)
 
 --- | Top-level document parser
 parseDocument :: YamlParser Yaml
 parseDocument =
-  many (try (char '%' *> takeWhileP Nothing (\c -> c /= '\n' && c /= '\r') *> eol))
-    *> skipBlankLines
-    *> optional (try (string "---" *> skipLineEnd *> skipBlankLines))
-    *> choice
-      [ try (lookAhead (choice [eof, void (try (string "..." *> skipLineEnd))]) *> return YNull),
-        (many (char ' ') >>= \spaces -> parseIndentedBlock (length spaces + 1))
-          <* skipBlankLines
-          <* optional (try (string "..." *> skipLineEnd))
-          <* skipBlankLines
-      ]
+    many
+        (try (char '%' *> takeWhileP Nothing (\c -> c /= '\n' && c /= '\r') *> eol))
+        *> skipBlankLines
+        *> optional (try (string "---" *> skipLineEnd *> skipBlankLines))
+        *> choice
+            [ try
+                ( lookAhead (choice [eof, void (try (string "..." *> skipLineEnd))])
+                    *> return YNull
+                ),
+              (many (char ' ') >>= \spaces -> parseIndentedBlock (length spaces + 1))
+                <* skipBlankLines
+                <* optional (try (string "..." *> skipLineEnd))
+                <* skipBlankLines
+            ]
 
 --- | Parse a YAML string into a 'Yaml' value.
 --- It conforms to the YAML 1.2.2 specification:
